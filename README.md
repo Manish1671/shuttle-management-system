@@ -4,9 +4,19 @@ A smart campus shuttle management platform built as part of a frontend case stud
 
 ## Project Status
 
-Milestone 1 — Project Foundation
+Milestone 2 — Application Shell & Demo Role Selection
 
-The app currently has the Next.js setup, design tokens, a redirect from `/` to `/login`, and a login placeholder. Authentication and the features listed below are not implemented yet.
+The app has a demo sign-in screen, a rider shell, and an admin shell. Protected routes redirect until a demo account is selected. Shuttle booking, trip history, driver scheduling, routes, and analytics are not implemented yet.
+
+### Demo accounts
+
+| Name | Role | ID |
+| --- | --- | --- |
+| Aarav Sharma | Student | STU2026001 |
+| Priya Mehta | Staff | EMP2026012 |
+| Transport Office | Administrator | ADM001 |
+
+Students and staff open `/dashboard`. The administrator opens `/admin`. The choice is stored in the browser and kept across refresh. Switch account returns to `/login`.
 
 ## Tech Stack
 
@@ -14,6 +24,8 @@ The app currently has the Next.js setup, design tokens, a redirect from `/` to `
 - React
 - TypeScript
 - Tailwind CSS
+- shadcn/ui
+- Lucide
 
 ## Planned Features
 
