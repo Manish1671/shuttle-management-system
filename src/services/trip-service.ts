@@ -159,6 +159,17 @@ export const tripService = {
     if (vehicle.status !== "active" && existing?.vehicleId !== vehicle.id) {
       return failure("VEHICLE_UNAVAILABLE", "This vehicle is not available for assignment.");
     }
+    if (!Number.isInteger(vehicle.capacity) || vehicle.capacity < 1) {
+      return failure("VEHICLE_CAPACITY", "This vehicle does not have a usable seat capacity.");
+    }
+    if (existing && (existing.status === "completed" || existing.status === "cancelled")) {
+      return failure(
+        "NOT_ALLOWED",
+        existing.status === "completed"
+          ? "A completed trip cannot be edited."
+          : "A cancelled trip cannot be edited.",
+      );
+    }
 
     const arrivalTime = plannedArrival(route, departureTime, existing);
     if (!arrivalTime) {

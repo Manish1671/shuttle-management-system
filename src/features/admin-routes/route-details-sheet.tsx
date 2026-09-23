@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { routeService } from "@/services/route-service";
 import type { Stop } from "@/types/stop";
 
@@ -28,27 +29,32 @@ export function RouteDetailsSheet({
 }) {
   const [stopError, setStopError] = useState<string | null>(null);
   const [activeError, setActiveError] = useState<string | null>(null);
+  const { pending, run } = useWriteGuard();
 
   function updateStops(stopIds: string[]) {
     if (!view) {
       return;
     }
-    setStopError(null);
-    const result = routeService.saveRoute({ ...view.route, stopIds });
-    if (!result.ok) {
-      setStopError(result.errors[0]?.message ?? "Unable to update the stop order.");
-    }
+    run(() => {
+      setStopError(null);
+      const result = routeService.saveRoute({ ...view.route, stopIds });
+      if (!result.ok) {
+        setStopError(result.errors[0]?.message ?? "Unable to update the stop order.");
+      }
+    });
   }
 
   function toggleActive() {
     if (!view) {
       return;
     }
-    setActiveError(null);
-    const result = routeService.setActive(view.route.id, !view.route.active);
-    if (!result.ok) {
-      setActiveError(result.errors[0]?.message ?? "Unable to update this route.");
-    }
+    run(() => {
+      setActiveError(null);
+      const result = routeService.setActive(view.route.id, !view.route.active);
+      if (!result.ok) {
+        setActiveError(result.errors[0]?.message ?? "Unable to update this route.");
+      }
+    });
   }
 
   return (
@@ -83,7 +89,7 @@ export function RouteDetailsSheet({
               </dl>
               {view.route.description ? <p className="text-sm text-muted-foreground">{view.route.description}</p> : null}
               <div>
-                <Button type="button" variant="outline" onClick={toggleActive}>
+                <Button type="button" variant="outline" disabled={pending} onClick={toggleActive}>
                   {view.route.active ? "Deactivate route" : "Activate route"}
                 </Button>
                 {activeError ? (

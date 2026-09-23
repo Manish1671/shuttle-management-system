@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { routeService, type RouteDraft } from "@/services/route-service";
 import type { Stop } from "@/types/stop";
 
@@ -31,10 +32,10 @@ export function RouteForm({
   const [active, setActive] = useState(draft.active);
   const [stopIds, setStopIds] = useState(draft.stopIds);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function save() {
-    setPending(true);
+    run(() => {
     setError(null);
     const result = routeService.saveRoute({
       id: draft.id,
@@ -45,12 +46,12 @@ export function RouteForm({
       estimatedDurationMinutes: Number(duration),
       active,
     });
-    setPending(false);
     if (!result.ok) {
       setError(result.errors[0]?.message ?? "Unable to save this route.");
       return;
     }
     onSaved();
+    });
   }
 
   return (

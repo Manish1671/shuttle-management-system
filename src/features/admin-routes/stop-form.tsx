@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { stopService, type StopDraft } from "@/services/stop-service";
 
 const fieldClassName =
@@ -14,18 +15,18 @@ export function StopForm({ draft, onSaved }: { draft: StopDraft; onSaved: () => 
   const [description, setDescription] = useState(draft.description);
   const [active, setActive] = useState(draft.active);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function save() {
-    setPending(true);
-    setError(null);
-    const result = stopService.saveStop({ id: draft.id, name, shortName, description, active });
-    setPending(false);
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to save this stop.");
-      return;
-    }
-    onSaved();
+    run(() => {
+      setError(null);
+      const result = stopService.saveStop({ id: draft.id, name, shortName, description, active });
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to save this stop.");
+        return;
+      }
+      onSaved();
+    });
   }
 
   return (

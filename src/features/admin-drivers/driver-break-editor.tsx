@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { scheduleService } from "@/services/schedule-service";
 import type { BreakReason, DriverBreak } from "@/types/schedule";
 
@@ -50,26 +51,26 @@ function BreakRow({ item, driverId, date }: { item: DriverBreak; driverId: strin
   const [endTime, setEndTime] = useState(item.endTime);
   const [reason, setReason] = useState<BreakReason>(item.reason);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function save() {
-    setPending(true);
-    setError(null);
-    const result = scheduleService.updateBreak(driverId, date, item.id, { startTime, endTime, reason });
-    setPending(false);
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to update this break.");
-    }
+    run(() => {
+      setError(null);
+      const result = scheduleService.updateBreak(driverId, date, item.id, { startTime, endTime, reason });
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to update this break.");
+      }
+    });
   }
 
   function remove() {
-    setPending(true);
-    setError(null);
-    const result = scheduleService.removeBreak(driverId, date, item.id);
-    setPending(false);
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to remove this break.");
-    }
+    run(() => {
+      setError(null);
+      const result = scheduleService.removeBreak(driverId, date, item.id);
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to remove this break.");
+      }
+    });
   }
 
   return (
@@ -116,16 +117,16 @@ function AddBreak({ driverId, date }: { driverId: string; date: string }) {
   const [endTime, setEndTime] = useState("12:30");
   const [reason, setReason] = useState<BreakReason>("meal");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function add() {
-    setPending(true);
-    setError(null);
-    const result = scheduleService.addBreak(driverId, date, startTime, endTime, reason);
-    setPending(false);
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to add this break.");
-    }
+    run(() => {
+      setError(null);
+      const result = scheduleService.addBreak(driverId, date, startTime, endTime, reason);
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to add this break.");
+      }
+    });
   }
 
   return (

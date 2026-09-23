@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { useWriteGuard } from "@/lib/use-write-guard";
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { bookingService } from "@/services/booking-service";
@@ -28,7 +30,7 @@ export function AdminBookings() {
   const [selected, setSelected] = useState<AdminBookingRow | null>(null);
   const [cancelTarget, setCancelTarget] = useState<AdminBookingRow | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
   const [notice, setNotice] = useState<string | null>(null);
 
   const metrics = useMemo(() => adminBookingMetrics(data.rows), [data.rows]);
@@ -38,23 +40,22 @@ export function AdminBookings() {
   );
 
   function confirmCancel() {
-    if (!cancelTarget || pending) {
+    if (!cancelTarget) {
       return;
     }
 
-    setPending(true);
-    setCancelError(null);
-    const result = bookingService.cancelBookingForAdmin(cancelTarget.view.booking.id);
-    setPending(false);
+    run(() => {
+      setCancelError(null);
+      const result = bookingService.cancelBookingForAdmin(cancelTarget.view.booking.id);
+      if (!result.ok) {
+        setCancelError(result.errors[0]?.message ?? "Unable to cancel this booking.");
+        return;
+      }
 
-    if (!result.ok) {
-      setCancelError(result.errors[0]?.message ?? "Unable to cancel this booking.");
-      return;
-    }
-
-    setCancelTarget(null);
-    setSelected(null);
-    setNotice("Booking cancelled successfully.");
+      setCancelTarget(null);
+      setSelected(null);
+      setNotice("Booking cancelled successfully.");
+    });
   }
 
   if (data.status === "loading") {

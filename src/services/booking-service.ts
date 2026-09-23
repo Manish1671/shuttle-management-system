@@ -86,8 +86,9 @@ function commitCancellation(booking: Booking, trip: Trip): CancelBookingResult {
 
     notifyBookingsChanged();
     return { ok: true };
-  } catch (error) {
+    } catch (error) {
     if (error instanceof RepositoryError) {
+      bookingRepository.update(booking.id, { status: booking.status });
       return {
         ok: false,
         errors: [
@@ -166,6 +167,7 @@ export const bookingService = {
       route: trip ? routeRepository.getById(trip.routeId) : null,
       tripBookings: trip ? bookingsForTrip(trip.id, bookings) : [],
       existingBookings: bookings,
+      stops: stopRepository.getAll(),
       now,
     });
 
@@ -196,6 +198,9 @@ export const bookingService = {
       return { ok: true, booking: created };
     } catch (error) {
       if (error instanceof RepositoryError) {
+        if (bookingRepository.getById(prepared.value.booking.id)) {
+          bookingRepository.delete(prepared.value.booking.id);
+        }
         return {
           ok: false,
           errors: [

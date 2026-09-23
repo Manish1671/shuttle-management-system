@@ -194,6 +194,10 @@ Charts and tables
 
 The analytics page does not forecast demand. Driver and vehicle sections count assigned trips. Assigned minutes are the sum of operating trip durations.
 
+### Validation
+
+Service writes return `{ ok: false, errors: [{ code, message }] }`. The message is safe to show in the form. A failed booking create or cancel rolls back the booking record if the seat count cannot be saved. A duty or break save is rejected when it would push an existing trip outside duty or into a break. Completed and cancelled trips cannot be edited. New bookings require active stops on an active route. Write buttons ignore a second click until the current save finishes.
+
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication

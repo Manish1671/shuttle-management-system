@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { scheduleService } from "@/services/schedule-service";
 
 import type { DriverDayView } from "./driver-types";
@@ -14,16 +15,16 @@ export function DriverScheduleEditor({ view, date }: { view: DriverDayView; date
   const [dutyStart, setDutyStart] = useState(view.schedule?.dutyStart ?? "07:00");
   const [dutyEnd, setDutyEnd] = useState(view.schedule?.dutyEnd ?? "16:00");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function save() {
-    setPending(true);
-    setError(null);
-    const result = scheduleService.saveDuty(view.driver.id, date, dutyStart, dutyEnd);
-    setPending(false);
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to save this schedule.");
-    }
+    run(() => {
+      setError(null);
+      const result = scheduleService.saveDuty(view.driver.id, date, dutyStart, dutyEnd);
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to save this schedule.");
+      }
+    });
   }
 
   return (

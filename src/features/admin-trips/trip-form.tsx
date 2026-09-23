@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { plannedArrival, tripService } from "@/services/trip-service";
 import type { Trip } from "@/types/trip";
 
@@ -32,7 +33,7 @@ export function TripForm({
   const [driverId, setDriverId] = useState(draft?.driverId ?? "");
   const [vehicleId, setVehicleId] = useState(draft?.vehicleId ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
   const route = data.routes.find((item) => item.id === routeId) ?? null;
   const stops = route
     ? route.stopIds.flatMap((stopId) => {
@@ -56,7 +57,7 @@ export function TripForm({
   const availableVehicles = vehicles.filter((option) => option.selectable).length;
 
   function save() {
-    setPending(true);
+    run(() => {
     setError(null);
     const result = tripService.saveTrip({
       id: draft?.id,
@@ -66,12 +67,12 @@ export function TripForm({
       serviceDate,
       departureTime,
     });
-    setPending(false);
     if (!result.ok) {
       setError(result.errors[0]?.message ?? "Unable to save this trip.");
       return;
     }
     onSaved();
+    });
   }
 
   return (

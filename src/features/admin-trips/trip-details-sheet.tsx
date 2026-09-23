@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { BookingStatusBadge } from "@/features/bookings/booking-status-badge";
 import { formatDisplayDate } from "@/lib/time";
+import { useWriteGuard } from "@/lib/use-write-guard";
 import { nextTripStatuses } from "@/lib/validation/domain";
 import { tripService } from "@/services/trip-service";
 import type { TripStatus } from "@/types/trip";
@@ -38,18 +39,21 @@ export function TripDetailsSheet({
 }) {
   const [statusError, setStatusError] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const { pending, run } = useWriteGuard();
 
   function changeStatus(status: TripStatus) {
     if (!view) {
       return;
     }
-    setStatusError(null);
-    const result = tripService.setTripStatus(view.trip.id, status);
-    if (!result.ok) {
-      setStatusError(result.errors[0]?.message ?? "Unable to update this trip.");
-      return;
-    }
-    setConfirmCancel(false);
+    run(() => {
+      setStatusError(null);
+      const result = tripService.setTripStatus(view.trip.id, status);
+      if (!result.ok) {
+        setStatusError(result.errors[0]?.message ?? "Unable to update this trip.");
+        return;
+      }
+      setConfirmCancel(false);
+    });
   }
 
   const next = view ? nextTripStatuses(view.trip.status) : [];
@@ -129,18 +133,18 @@ export function TripDetailsSheet({
                 </Button>
               </section>
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={() => onEdit(view.trip.id)}>
+                <Button type="button" variant="outline" disabled={pending} onClick={() => onEdit(view.trip.id)}>
                   Edit trip
                 </Button>
                 {next
                   .filter((status) => status !== "cancelled")
                   .map((status) => (
-                    <Button key={status} type="button" variant="outline" onClick={() => changeStatus(status)}>
+                    <Button key={status} type="button" variant="outline" disabled={pending} onClick={() => changeStatus(status)}>
                       Mark {statusLabel[status].toLowerCase()}
                     </Button>
                   ))}
                 {next.includes("cancelled") ? (
-                  <Button type="button" variant="outline" onClick={() => setConfirmCancel(true)}>
+                  <Button type="button" variant="outline" disabled={pending} onClick={() => setConfirmCancel(true)}>
                     Cancel trip
                   </Button>
                 ) : null}
@@ -152,7 +156,7 @@ export function TripDetailsSheet({
                     {view.occupied === 1 ? "" : "s"}. Bookings are not deleted.
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <Button type="button" variant="destructive" onClick={() => changeStatus("cancelled")}>
+                    <Button type="button" variant="destructive" disabled={pending} onClick={() => changeStatus("cancelled")}>
                       Confirm cancellation
                     </Button>
                     <Button type="button" variant="outline" onClick={() => setConfirmCancel(false)}>

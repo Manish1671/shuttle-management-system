@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { useWriteGuard } from "@/lib/use-write-guard";
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/auth/current-user-provider";
@@ -55,25 +57,24 @@ export function MyBookings() {
   const [selected, setSelected] = useState<BookingViewModel | null>(null);
   const [cancelTarget, setCancelTarget] = useState<BookingViewModel | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { pending, run } = useWriteGuard();
 
-  async function confirmCancel() {
-    if (!user || !cancelTarget || pending) {
+  function confirmCancel() {
+    if (!user || !cancelTarget) {
       return;
     }
 
-    setPending(true);
-    setCancelError(null);
-    const result = bookingService.cancelBooking(cancelTarget.booking.id, user.id);
-    setPending(false);
+    run(() => {
+      setCancelError(null);
+      const result = bookingService.cancelBooking(cancelTarget.booking.id, user.id);
+      if (!result.ok) {
+        setCancelError(result.errors[0]?.message ?? "Unable to cancel this booking.");
+        return;
+      }
 
-    if (!result.ok) {
-      setCancelError(result.errors[0]?.message ?? "Unable to cancel this booking.");
-      return;
-    }
-
-    setCancelTarget(null);
-    setSelected(null);
+      setCancelTarget(null);
+      setSelected(null);
+    });
   }
 
   return (

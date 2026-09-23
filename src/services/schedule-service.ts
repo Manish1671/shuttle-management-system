@@ -1,11 +1,11 @@
 import { isDateString, isTimeString } from "@/lib/time";
-import { validateDriverSchedule } from "@/lib/validation/domain";
+import { findDriverAssignmentConflicts, validateDriverSchedule } from "@/lib/validation/domain";
 import type { ValidationError } from "@/lib/validation/result";
 import { notifyBookingsChanged } from "@/services/booking-sync";
 import { RepositoryError } from "@/services/repository/collection";
 import type { BreakReason, DriverBreak, DriverSchedule } from "@/types/schedule";
 
-import { scheduleRepository } from "./repository";
+import { driverRepository, scheduleRepository, tripRepository } from "./repository";
 
 export type ScheduleWriteResult =
   | { ok: true; schedule: DriverSchedule }
@@ -29,10 +29,42 @@ function nextBreakId(schedule: DriverSchedule): string {
   return id;
 }
 
+function introducedErrors(before: readonly ValidationError[], after: readonly ValidationError[]): ValidationError[] {
+  return after.filter(
+    (error) => !before.some((item) => item.code === error.code && item.message === error.message),
+  );
+}
+
 function persist(schedule: DriverSchedule): ScheduleWriteResult {
+  if (!driverRepository.getById(schedule.driverId)) {
+    return failure("DRIVER_NOT_FOUND", "This driver could not be found.");
+  }
+
   const check = validateDriverSchedule(schedule);
   if (!check.valid) {
     return { ok: false, errors: check.errors };
+  }
+
+  const trips = tripRepository
+    .getAll()
+    .filter((trip) => trip.driverId === schedule.driverId && trip.serviceDate === schedule.date);
+  const previous = scheduleRepository.getById(schedule.id);
+  const conflicts = introducedErrors(
+    findDriverAssignmentConflicts(schedule.driverId, schedule.date, previous, trips),
+    findDriverAssignmentConflicts(schedule.driverId, schedule.date, schedule, trips),
+  );
+  if (conflicts.length > 0) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: conflicts[0]?.code ?? "DRIVER_SCHEDULE_CONFLICT",
+          message:
+            conflicts[0]?.message ??
+            "This schedule would conflict with an existing trip.",
+        },
+      ],
+    };
   }
 
   try {

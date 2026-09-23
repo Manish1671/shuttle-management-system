@@ -1,5 +1,6 @@
 import type { Booking } from "@/types/booking";
 import type { Route } from "@/types/route";
+import type { Stop } from "@/types/stop";
 import type { Trip } from "@/types/trip";
 import type { User } from "@/types/user";
 import { formatDateTimeStamp, hasDeparted } from "@/lib/time";
@@ -115,6 +116,7 @@ export function prepareBooking(input: {
   route: Route | null;
   tripBookings: readonly Booking[];
   existingBookings: readonly Pick<Booking, "id">[];
+  stops: readonly Pick<Stop, "id" | "active">[];
   now?: Date;
 }): PrepareBookingResult {
   const now = input.now ?? new Date();
@@ -154,6 +156,12 @@ export function prepareBooking(input: {
 
   if (!route || route.id !== trip.routeId || !route.active) {
     return failure("ROUTE_NOT_FOUND", "This route is no longer available.");
+  }
+
+  const pickup = input.stops.find((stop) => stop.id === request.pickupStopId);
+  const dropoff = input.stops.find((stop) => stop.id === request.dropoffStopId);
+  if (!pickup?.active || !dropoff?.active) {
+    return failure("BOOKING_STOP_REFERENCE", "Choose an active stop on this route.");
   }
 
   const stopCheck = validatePickupAndDropoff(

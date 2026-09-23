@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { useCurrentUser } from "@/features/auth/current-user-provider";
@@ -45,6 +45,7 @@ export function BookShuttleFlow() {
   const [step, setStep] = useState<Step>("search");
   const [formKey, setFormKey] = useState(0);
   const [pending, setPending] = useState<"search" | "confirm" | null>(null);
+  const writeLock = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<SearchState | null>(null);
   const [draft, setDraft] = useState<BookingDraftView | null>(null);
@@ -56,22 +57,25 @@ export function BookShuttleFlow() {
   }
 
   async function handleSearch(values: BookingSearchValues) {
-    if (pending) {
+    if (writeLock.current) {
       return;
     }
 
+    writeLock.current = true;
     setPending("search");
     setError(null);
-    await wait(200);
-
-    const results = bookingService.searchBookableTrips(values.routeId, values.serviceDate);
-    const pickupName = stops.find((stop) => stop.id === values.pickupStopId)?.name ?? "Pickup";
-    const dropoffName =
-      stops.find((stop) => stop.id === values.dropoffStopId)?.name ?? "Destination";
-
-    setSearch({ values, pickupName, dropoffName, results });
-    setStep("search");
-    setPending(null);
+    try {
+      await wait(200);
+      const results = bookingService.searchBookableTrips(values.routeId, values.serviceDate);
+      const pickupName = stops.find((stop) => stop.id === values.pickupStopId)?.name ?? "Pickup";
+      const dropoffName =
+        stops.find((stop) => stop.id === values.dropoffStopId)?.name ?? "Destination";
+      setSearch({ values, pickupName, dropoffName, results });
+      setStep("search");
+    } finally {
+      writeLock.current = false;
+      setPending(null);
+    }
   }
 
   function handleSelect(option: BookableTrip) {
@@ -92,30 +96,33 @@ export function BookShuttleFlow() {
   }
 
   async function handleConfirm() {
-    if (!user || !draft || pending) {
+    if (!user || !draft || writeLock.current) {
       return;
     }
 
+    writeLock.current = true;
     setPending("confirm");
     setError(null);
-    await wait(200);
+    try {
+      await wait(200);
+      const result = bookingService.createBooking({
+        userId: user.id,
+        tripId: draft.option.trip.id,
+        pickupStopId: draft.pickupStopId,
+        dropoffStopId: draft.dropoffStopId,
+      });
 
-    const result = bookingService.createBooking({
-      userId: user.id,
-      tripId: draft.option.trip.id,
-      pickupStopId: draft.pickupStopId,
-      dropoffStopId: draft.dropoffStopId,
-    });
+      if (!result.ok) {
+        setError(result.errors[0]?.message ?? "Unable to complete booking.");
+        return;
+      }
 
-    if (!result.ok) {
-      setError(result.errors[0]?.message ?? "Unable to complete booking.");
+      setBooking(result.booking);
+      setStep("success");
+    } finally {
+      writeLock.current = false;
       setPending(null);
-      return;
     }
-
-    setBooking(result.booking);
-    setStep("success");
-    setPending(null);
   }
 
   function handleBookAnother() {

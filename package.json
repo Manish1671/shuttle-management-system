@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "validate:seed": "tsx src/data/seed/check-integrity.ts"
+    "validate:seed": "tsx src/data/seed/check-integrity.ts",
+    "test": "tsx --test src/services/invariants.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
