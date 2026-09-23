@@ -138,6 +138,24 @@ Breaks are stored on the driver's schedule for that date, not in a separate coll
 
 The timeline is built from that date's duty, breaks, and non-cancelled trips. Outside duty is off duty. Inside duty, a trip overrides a break, and a break overrides open time. `findDriverAssignmentConflicts` reports overlapping trips, trips outside duty, trips during a break, and trips with no schedule. Those conflicts are shown and are not rewritten.
 
+### Route and stop management
+
+```
+/admin/routes
+  ↓
+Route feature
+  ↓
+routeService.saveRoute / stopService.saveStop
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+A route keeps an ordered `stopIds` list. That order is what rider booking uses to require the pickup before the destination. Reordering writes the same list. Removing a stop from a route does not delete the stop. Stop ids stay stable when a name or code is edited, and route ids stay stable so trips and bookings keep their references.
+
+`saveRoute` checks the route shape with `validateRouteStops`, then refuses an order that would put an active booking's pickup at or after its destination. Deactivating a route leaves it in storage and hides it from new booking. The booking catalog rebuilds when route data changes, and it only offers active routes. Inactive stops are left off the new-booking stop list. Historical bookings still resolve the stop by id.
+
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication

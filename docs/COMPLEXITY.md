@@ -76,3 +76,14 @@ Drivers, schedules, trips, routes, and vehicles are loaded once per refresh and 
 | Driver status | O(tᵈ) | O(1) | Same rule as the dashboard: an active trip, otherwise the clock against duty and breaks. `tᵈ` is that driver's trips on the date. |
 | Timeline | O(k log k) | O(k) | `k` is the duty, break, and trip boundaries for one driver. Adjacent segments of the same kind are merged. |
 | Conflicts | O(tᵈ log tᵈ + tᵈ · bᵈ) | O(tᵈ) | Overlapping trips use the existing sort-and-scan. Each trip is also compared with duty and that day's breaks. |
+
+## Route management
+
+Routes, stops, trips, and bookings are loaded once. Trips are grouped by route and occupied bookings are counted by trip before any route row is built.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load routes | O(r + s + t + b) | O(r + s + t) | `r` routes, `s` stops, `t` trips, `b` bookings. Stop names are map lookups. |
+| Search and filter | O(r · p) | O(r) | `p` is the stops on a route. Matching includes the route name, code, and stop names. |
+| Route usage | O(t + b) | O(t) | Today's trips, later trips, and non-cancelled bookings are counted while the view is built. |
+| Reorder or save | O(s + bᵣ) | O(s) | The new `stopIds` list is validated, then active bookings on that route are checked for pickup order. `bᵣ` is bookings on the route's open trips. |

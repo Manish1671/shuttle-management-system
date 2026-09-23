@@ -51,7 +51,7 @@ export function BookShuttleFlow() {
   const [booking, setBooking] = useState<Booking | null>(null);
 
   function handleRouteChange(routeId: string) {
-    setStops(routeId ? routeService.getOrderedStops(routeId) : []);
+    setStops(routeId ? routeService.getOrderedStops(routeId).filter((stop) => stop.active) : []);
     setSearch(null);
   }
 

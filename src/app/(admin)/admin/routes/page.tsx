@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { AdminRoutes } from "@/features/admin-routes/admin-routes";
 
 export const metadata: Metadata = {
   title: "Route Management",
-  description: "Campus shuttle routes and stops.",
+  description: "Manage campus shuttle routes, stops, and service availability.",
 };
 
 export default function AdminRoutesPage() {
-  return (
-    <PlaceholderPage
-      title="Route Management"
-      description="Shuttle routes and their pickup and drop-off points will be defined here."
-    />
-  );
+  return <AdminRoutes />;
 }

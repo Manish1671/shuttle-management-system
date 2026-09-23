@@ -1,4 +1,5 @@
 import { todayDateString } from "@/lib/time";
+import { getBookingRevision, subscribeBookingChanges } from "@/services/booking-sync";
 import { routeService } from "@/services/route-service";
 import { tripService } from "@/services/trip-service";
 import type { Route } from "@/types/route";
@@ -16,27 +17,32 @@ const emptyCatalog: BookingCatalog = {
 };
 
 let catalog: BookingCatalog | null = null;
+let catalogRevision = -1;
 
-export function subscribeBookingCatalog(): () => void {
-  return () => {};
+export function subscribeBookingCatalog(listener: () => void): () => void {
+  return subscribeBookingChanges(() => {
+    catalog = null;
+    listener();
+  });
 }
 
 export function getBookingCatalog(): BookingCatalog {
-  if (!catalog) {
-    const today = todayDateString();
-    const dates = [
-      ...new Set(tripService.getAll().map((trip) => trip.serviceDate)),
-    ]
-      .filter((date) => date >= today)
-      .sort();
-    const routes = routeService
-      .getAll()
-      .filter((route) => route.active)
-      .sort((left, right) => left.code.localeCompare(right.code));
-
-    catalog = { ready: true, dates, routes };
+  const revision = getBookingRevision();
+  if (catalog && catalogRevision === revision) {
+    return catalog;
   }
 
+  const today = todayDateString();
+  const dates = [...new Set(tripService.getAll().map((trip) => trip.serviceDate))]
+    .filter((date) => date >= today)
+    .sort();
+  const routes = routeService
+    .getAll()
+    .filter((route) => route.active)
+    .sort((left, right) => left.code.localeCompare(right.code));
+
+  catalogRevision = revision;
+  catalog = { ready: true, dates, routes };
   return catalog;
 }
 
