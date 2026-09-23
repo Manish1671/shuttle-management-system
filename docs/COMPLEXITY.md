@@ -65,3 +65,14 @@ Collections are read once and indexed by id. Each booking is resolved from those
 | Filter | O(b) | O(b) | Search, status, trip date, and route are one pass. The input is already sorted. |
 | Sort | O(b log b) | O(b) | Newest trip date first, then later departure, then booking id. |
 | Admin cancel | O(b) | O(b) | Same write as a rider cancel: status update, occupied-seat recount, both collections rewritten. |
+
+## Driver availability
+
+Drivers, schedules, trips, routes, and vehicles are loaded once per refresh and indexed by id. The visible timeline window is one pass over that date's duty times and trips. Each driver is then classified from the in-memory lists.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load the day | O(d + s + t + r + v) | O(d + s + t) | `d` drivers, `s` schedules, `t` trips, plus route and vehicle maps. No per-cell repository reads. |
+| Driver status | O(tᵈ) | O(1) | Same rule as the dashboard: an active trip, otherwise the clock against duty and breaks. `tᵈ` is that driver's trips on the date. |
+| Timeline | O(k log k) | O(k) | `k` is the duty, break, and trip boundaries for one driver. Adjacent segments of the same kind are merged. |
+| Conflicts | O(tᵈ log tᵈ + tᵈ · bᵈ) | O(tᵈ) | Overlapping trips use the existing sort-and-scan. Each trip is also compared with duty and that day's breaks. |

@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { AdminDrivers } from "@/features/admin-drivers/admin-drivers";
 
 export const metadata: Metadata = {
   title: "Driver Management",
-  description: "Driver profiles and duty schedules.",
+  description: "Manage drivers, duty schedules, breaks, and availability.",
 };
 
 export default function AdminDriversPage() {
-  return (
-    <PlaceholderPage
-      title="Driver Management"
-      description="Driver profiles, duty hours, and breaks will be managed here."
-    />
-  );
+  return <AdminDrivers />;
 }

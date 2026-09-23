@@ -120,6 +120,24 @@ The page loads bookings, trips, routes, stops, drivers, vehicles, and users once
 
 `cancelBookingForAdmin` applies the same eligibility rules as a rider cancellation and skips the passenger-ownership check. It sets the booking to `cancelled`, recounts `bookedSeats`, and keeps the record. Rider My Bookings and the admin dashboard read that same write.
 
+### Driver management and availability
+
+```
+/admin/drivers
+  ↓
+Driver feature (list, timeline, schedule editor)
+  ↓
+scheduleService / driverService / tripService
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+Breaks are stored on the driver's schedule for that date, not in a separate collection. `saveDuty`, `addBreak`, `updateBreak`, and `removeBreak` validate with `validateDriverSchedule` before writing. A saved change notifies the same revision the dashboard already watches, so driver status stays aligned.
+
+The timeline is built from that date's duty, breaks, and non-cancelled trips. Outside duty is off duty. Inside duty, a trip overrides a break, and a break overrides open time. `findDriverAssignmentConflicts` reports overlapping trips, trips outside duty, trips during a break, and trips with no schedule. Those conflicts are shown and are not rewritten.
+
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication

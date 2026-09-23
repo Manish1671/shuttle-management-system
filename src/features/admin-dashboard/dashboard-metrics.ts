@@ -1,7 +1,8 @@
-import { clockMinutes, parseTimeToMinutes, todayDateString } from "@/lib/time";
+import { parseTimeToMinutes, todayDateString } from "@/lib/time";
+import { deriveDriverStatus } from "@/services/driver-status";
 import { occupiesSeat } from "@/lib/validation/domain";
 import type { Booking } from "@/types/booking";
-import type { Driver, DriverStatus } from "@/types/driver";
+import type { Driver } from "@/types/driver";
 import type { DriverSchedule } from "@/types/schedule";
 import type { Route } from "@/types/route";
 import type { Stop } from "@/types/stop";
@@ -49,45 +50,6 @@ export function formatUtilization(bookings: number, capacity: number): string {
 
   const percent = Math.round((bookings / capacity) * 1000) / 10;
   return Number.isInteger(percent) ? `${percent}%` : `${percent.toFixed(1)}%`;
-}
-
-/**
- * Operational status for the dashboard.
- * An active trip (boarding or in progress) wins.
- * Otherwise the duty schedule and the clock decide.
- * The stored Driver.status field is not used.
- */
-export function deriveDriverStatus(
-  driverId: string,
-  todayTrips: readonly Trip[],
-  schedule: DriverSchedule | undefined,
-  now: Date,
-): DriverStatus {
-  const onTrip = todayTrips.some(
-    (trip) => trip.driverId === driverId && ACTIVE_TRIP_STATUSES.has(trip.status),
-  );
-  if (onTrip) {
-    return "on_trip";
-  }
-
-  if (!schedule) {
-    return "off_duty";
-  }
-
-  const nowMinutes = clockMinutes(now);
-  const dutyStart = parseTimeToMinutes(schedule.dutyStart);
-  const dutyEnd = parseTimeToMinutes(schedule.dutyEnd);
-  if (dutyStart === null || dutyEnd === null || nowMinutes < dutyStart || nowMinutes >= dutyEnd) {
-    return "off_duty";
-  }
-
-  const onBreak = schedule.breaks.some((item) => {
-    const start = parseTimeToMinutes(item.startTime);
-    const end = parseTimeToMinutes(item.endTime);
-    return start !== null && end !== null && nowMinutes >= start && nowMinutes < end;
-  });
-
-  return onBreak ? "on_break" : "available";
 }
 
 function occupiedByTrip(bookings: readonly Booking[]): Map<string, Booking[]> {

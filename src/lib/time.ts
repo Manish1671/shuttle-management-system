@@ -65,6 +65,14 @@ export function clockMinutes(now = new Date()): number {
   return now.getHours() * 60 + now.getMinutes();
 }
 
+/** HH:mm from minutes since midnight. Values outside 00:00–23:59 are clamped. */
+export function formatMinutes(total: number): string {
+  const bounded = Math.min(23 * 60 + 59, Math.max(0, Math.round(total)));
+  const hours = Math.floor(bounded / 60);
+  const minutes = bounded % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 /** Returns minutes from midnight, or null when the value is not HH:mm. */
 export function parseTimeToMinutes(value: string): number | null {
   if (!isTimeString(value)) {

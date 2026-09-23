@@ -283,6 +283,78 @@ export function findTripOverlaps(
   return errors;
 }
 
+/**
+ * Assignment problems for one driver on one date.
+ * Cancelled trips are ignored. Nothing is rewritten.
+ */
+export function findDriverAssignmentConflicts(
+  driverId: string,
+  date: string,
+  schedule: DriverSchedule | null,
+  trips: readonly Trip[],
+): ValidationError[] {
+  const dayTrips = trips.filter(
+    (trip) => trip.driverId === driverId && trip.serviceDate === date && trip.status !== "cancelled",
+  );
+  const errors = [...validateDriverTripOverlap(driverId, dayTrips).errors];
+
+  if (!schedule) {
+    if (dayTrips.length > 0) {
+      errors.push(
+        error(
+          "DRIVER_SCHEDULE_CONFLICT",
+          "Trips are assigned, but this driver has no duty schedule on this date.",
+        ),
+      );
+    }
+    return errors;
+  }
+
+  const dutyStart = parseTimeToMinutes(schedule.dutyStart);
+  const dutyEnd = parseTimeToMinutes(schedule.dutyEnd);
+
+  for (const trip of dayTrips) {
+    const departure = parseTimeToMinutes(trip.departureTime);
+    const arrival = parseTimeToMinutes(trip.arrivalTime);
+    if (
+      dutyStart === null ||
+      dutyEnd === null ||
+      departure === null ||
+      arrival === null ||
+      departure < dutyStart ||
+      arrival > dutyEnd
+    ) {
+      errors.push(
+        error(
+          "DRIVER_SCHEDULE_CONFLICT",
+          `Trip ${trip.departureTime}–${trip.arrivalTime} falls outside duty ${schedule.dutyStart}–${schedule.dutyEnd}.`,
+        ),
+      );
+    }
+
+    for (const item of schedule.breaks) {
+      const breakStart = parseTimeToMinutes(item.startTime);
+      const breakEnd = parseTimeToMinutes(item.endTime);
+      if (
+        breakStart !== null &&
+        breakEnd !== null &&
+        departure !== null &&
+        arrival !== null &&
+        rangesOverlap(departure, arrival, breakStart, breakEnd)
+      ) {
+        errors.push(
+          error(
+            "TRIP_DURING_BREAK",
+            `Trip ${trip.departureTime}–${trip.arrivalTime} overlaps the ${item.reason} break ${item.startTime}–${item.endTime}.`,
+          ),
+        );
+      }
+    }
+  }
+
+  return errors;
+}
+
 export function validateDriverTripOverlap(
   driverId: string,
   trips: readonly TimedTrip[],
