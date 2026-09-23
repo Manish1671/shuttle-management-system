@@ -110,3 +110,7 @@ Trips, bookings, routes, drivers, and vehicles are loaded once. Bookings are cou
 | Hourly demand | O(t) | O(h) | Operating trips are grouped by departure hour. `h` is the hours from the earliest departure to the latest. |
 | Daily demand | O(t + days) | O(days) | Occupied seats are summed by service date, then each day in the range is filled, including zeros. |
 | Utilization | O(t + r) | O(r) | Occupied seats and capacity are summed per route, driver, and vehicle. |
+
+## Larger datasets
+
+These costs assume the whole campus dataset is copied out of `localStorage` and scanned in the browser. That is acceptable here because each collection stays under 100 records. A production API would keep id indexes, date indexes, and seat counts in the database so a booking search or an analytics range would not reread every trip and booking on each page load. The feature screens would still call the same service functions.

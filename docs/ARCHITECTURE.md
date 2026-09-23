@@ -4,9 +4,9 @@ CampusRide is the product name for the Shuttle Management System, a smart campus
 
 ## Purpose
 
-Students and staff book campus shuttle rides and review their trip history. Transport administrators manage bookings, driver duty and breaks, routes and stops, driver assignments, and shuttle usage so peak hours can be scheduled more effectively.
+Students and staff book campus shuttle rides, manage reservations, and review trip history. Transport administrators review operations, manage bookings, driver duty and breaks, routes and ordered stops, trip assignments, and descriptive analytics.
 
-Domain behaviour such as booking, scheduling, and analytics is added in later milestones. There is still no backend or database.
+This is a frontend demo. There is no backend, database, or production authentication.
 
 ## Current architecture
 
@@ -30,12 +30,12 @@ Browser
               └── /admin/analytics
 ```
 
-Rider and admin routes are placeholders. They render inside the shell and do not contain booking, driver, route, or analytics screens. Domain records exist underneath those screens and are not rendered yet.
+`/dashboard` and `/admin/vehicles` are still placeholders. The other rider and admin routes are working screens over the same local dataset.
 
 ### Domain data
 
 ```
-UI (later milestones)
+UI (src/features and src/app)
   ↓
 Feature layer (src/features)
   ↓
@@ -226,19 +226,20 @@ Shared primitives from shadcn/ui used by the shell are button, avatar, sheet, dr
 | Tailwind CSS 4 | Styling from shared design tokens |
 | shadcn/ui | Accessible shell primitives |
 | Lucide | Icons |
-| Recharts | Hourly demand chart on the admin overview |
+| Recharts | Demand and status charts on the overview and analytics pages |
 | ESLint (`eslint-config-next`) | Lint rules for Next.js and TypeScript |
+| Node.js test runner via `tsx` | Domain invariant tests in `src/services/invariants.test.ts` |
 
-React Hook Form and Zod are used by the booking search form. Vitest is not installed. Redux, Zustand, a database, and a separate API are out of scope for the MVP.
+React Hook Form and Zod validate the booking search form. Redux, Zustand, a database, and a separate API are not part of this demo.
 
 ## Layers
 
 | Layer | Path | Responsibility |
 | --- | --- | --- |
-| Routes | `src/app` | Pages and layouts. Placeholders only at this stage. |
+| Routes | `src/app` | Pages and layouts. `/dashboard` and `/admin/vehicles` are placeholders. |
 | UI | `src/components` | Shared layout and visual primitives |
-| Features | `src/features` | Screen-level modules. Auth is the only feature so far. |
-| Services | `src/services` | Domain reads and writes used by future screens |
+| Features | `src/features` | Screen modules for auth, booking, history, and each admin area |
+| Services | `src/services` | Domain reads, writes, and validation |
 | Repository | `src/services/repository` | Collection storage over localStorage |
 | Seed data | `src/data/seed` | The initial campus network |
 | Types | `src/types` | User, driver, vehicle, stop, route, trip, booking, schedule |

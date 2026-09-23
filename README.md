@@ -1,56 +1,54 @@
-# CampusRide — Shuttle Management System
+# CampusRide
 
-A smart campus shuttle management platform built as part of a frontend case study.
+CampusRide is a campus shuttle booking and operations demo. Students and staff reserve seats. The transport office manages the timetable, drivers, routes, and a descriptive view of demand.
 
-## Project Status
+This is a frontend case study. Data lives in the browser. There is no production backend.
 
-Milestone 11 — Transport Analytics
+## Features
 
-Students and staff can book a shuttle, view reservations, and cancel eligible bookings. The transport office can review operations, manage bookings, manage driver availability, manage routes and stops, schedule trips, and review demand, occupancy, and cancellations. Vehicle management is not implemented yet.
+Rider:
 
-### Demo accounts
+- Shuttle booking
+- My Bookings, including cancellation of eligible reservations
+- Trip history
 
-| Name | Role | ID |
-| --- | --- | --- |
-| Aarav Sharma | Student | STU2026001 |
-| Priya Mehta | Staff | EMP2026012 |
-| Transport Office | Administrator | ADM001 |
+Admin:
 
-Students and staff open `/dashboard`. The administrator opens `/admin`. The choice is stored in the browser and kept across refresh. Switch account returns to `/login`.
+- Operations dashboard
+- Booking management
+- Driver duty, breaks, and an availability timeline
+- Route and ordered-stop management
+- Trip management with driver and vehicle assignment
+- Transport analytics
+
+`/dashboard` and `/admin/vehicles` are placeholders.
 
 ## Tech Stack
 
-- Next.js
-- React
+- Next.js 16 (App Router)
+- React 19
 - TypeScript
-- Tailwind CSS
+- Tailwind CSS 4
 - shadcn/ui
-- Lucide
+- Lucide icons
 - Recharts
+- React Hook Form and Zod for the booking search form
 
-## Planned Features
+## Architecture
 
-- Shuttle booking
-- Trip history
-- Admin booking management
-- Driver availability timeline
-- Driver scheduling
-- Route management
-- Driver assignment
-- Shuttle usage and demand analytics
+```
+UI
+  ↓
+features and hooks
+  ↓
+services and domain validation
+  ↓
+repository
+  ↓
+localStorage
+```
 
-## Project Structure
-
-- `src/app` — App Router pages and global styles. `/` redirects to `/login`.
-- `src/components` — shared UI, reserved for layout, data display, feedback, and forms.
-- `src/features` — product areas (bookings, drivers, schedule, routes, trips, analytics). Empty until those milestones.
-- `src/services` — functions the UI will call.
-- `src/server` — in-browser mock repository and domain rules, added later.
-- `src/data/seed` — demo data, added later.
-- `src/store` — shared client state, added later.
-- `src/types`, `src/lib`, `src/hooks` — domain types, helpers, and reusable hooks.
-- `docs` — architecture and complexity notes.
-- `public` — static assets.
+Screens call services. Services validate, then read and write collections. The repository copies seed data into `localStorage` on the first browser visit. Server rendering does not write to storage. See `docs/ARCHITECTURE.md` and `docs/COMPLEXITY.md`.
 
 ## Getting Started
 
@@ -59,13 +57,77 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The home page redirects to `/login`.
+Open [http://localhost:3000](http://localhost:3000). `/` redirects to `/login`.
+
+## Demo Accounts
+
+| Name | Role | ID |
+| --- | --- | --- |
+| Aarav Sharma | Student | STU2026001 |
+| Priya Mehta | Staff | EMP2026012 |
+| Transport Office | Administrator | ADM001 |
+
+Students and staff land on `/dashboard`. The administrator lands on `/admin`. The chosen id is stored as `campusride.userId`. Switch account returns to `/login`. This is a demo picker, not an authentication system.
+
+## Main Routes
+
+Rider:
+
+- `/book`
+- `/bookings`
+- `/history`
+- `/dashboard` (placeholder)
+
+Admin:
+
+- `/admin`
+- `/admin/bookings`
+- `/admin/drivers`
+- `/admin/routes`
+- `/admin/trips`
+- `/admin/analytics`
+- `/admin/vehicles` (placeholder)
+
+A rider who opens an admin URL is sent to `/dashboard`. An administrator who opens a rider URL is sent to `/admin`.
+
+## Validation
+
+Writes go through services and return `{ ok: false, errors: [{ code, message }] }`. The protections include:
+
+- Seat capacity and duplicate active bookings
+- Pickup before destination, on an active route, using active stops
+- Route and stop codes, at least two distinct stops, and protection of existing bookings
+- Driver duty, breaks, and overlapping trips
+- Vehicle overlap, inactive or maintenance vehicles, and capacity below occupied seats
+- Forward-only trip status changes
+
+A regression checklist is in `docs/REGRESSION.md`.
+
+## Testing
 
 ```bash
+npm test
 npm run lint
 npm run typecheck
+npm run validate:seed
 ```
 
-## Case Study
+`npm test` runs the domain invariant tests with Node's test runner. `npm run validate:seed` checks the seeded dataset.
 
-This project is based on the Shuttle Management System case study assigned in the LPU Frontend Case Studies document.
+## Project Structure
+
+- `src/app` — App Router pages and layouts
+- `src/features` — booking, history, and admin screens
+- `src/services` — domain services, repository, and invariant tests
+- `src/components` — shell and shared UI
+- `src/data/seed` — the initial campus dataset
+- `src/types` and `src/lib` — domain types, time helpers, and validation
+- `docs` — architecture, complexity, and the regression checklist
+
+## Known Limitations
+
+- Frontend only. Persistence is `localStorage`, not a database or API.
+- Sign-in is a demo account picker.
+- The rider dashboard and vehicle management page are placeholders.
+- There is no live GPS, payments, notifications, or production deployment.
+- Tests cover domain rules. They do not drive the browser.
