@@ -1,5 +1,13 @@
-import { parseTimeToMinutes, todayDateString } from "@/lib/time";
+import { todayDateString } from "@/lib/time";
 import { deriveDriverStatus } from "@/services/driver-status";
+import {
+  CAPACITY_ATTENTION_RATIO,
+  formatUtilization,
+  hourlyDemand,
+  isActiveTrip,
+  peakDemand,
+  utilizationByRoute,
+} from "@/services/operations-metrics";
 import { occupiesSeat } from "@/lib/validation/domain";
 import type { Booking } from "@/types/booking";
 import type { Driver } from "@/types/driver";
@@ -13,18 +21,14 @@ import type { Vehicle } from "@/types/vehicle";
 import type {
   AdminDashboard,
   DashboardAlert,
-  DemandPoint,
   DriverStatusCounts,
-  PeakDemand,
   RecentBookingRow,
   RouteUtilizationRow,
   TodayTripRow,
 } from "./dashboard-types";
 
-/** Share of seats filled before a trip is flagged as approaching capacity. */
-export const CAPACITY_ATTENTION_RATIO = 0.8;
+export { CAPACITY_ATTENTION_RATIO, formatUtilization };
 
-const ACTIVE_TRIP_STATUSES = new Set<TripStatus>(["boarding", "in_progress"]);
 const OPEN_TRIP_STATUSES = new Set<TripStatus>(["scheduled", "boarding", "in_progress"]);
 const RECENT_BOOKING_LIMIT = 6;
 
@@ -43,15 +47,6 @@ function indexById<T extends { id: string }>(records: readonly T[]): Map<string,
   return new Map(records.map((record) => [record.id, record]));
 }
 
-export function formatUtilization(bookings: number, capacity: number): string {
-  if (capacity <= 0) {
-    return "0%";
-  }
-
-  const percent = Math.round((bookings / capacity) * 1000) / 10;
-  return Number.isInteger(percent) ? `${percent}%` : `${percent.toFixed(1)}%`;
-}
-
 function occupiedByTrip(bookings: readonly Booking[]): Map<string, Booking[]> {
   const grouped = new Map<string, Booking[]>();
   for (const booking of bookings) {
@@ -67,52 +62,6 @@ function occupiedByTrip(bookings: readonly Booking[]): Map<string, Booking[]> {
     }
   }
   return grouped;
-}
-
-function buildDemand(todayTrips: readonly Trip[], occupied: Map<string, Booking[]>): DemandPoint[] {
-  const counts = new Map<string, number>();
-  let minHour: number | null = null;
-  let maxHour: number | null = null;
-
-  for (const trip of todayTrips) {
-    if (trip.status === "cancelled") {
-      continue;
-    }
-
-    const minutes = parseTimeToMinutes(trip.departureTime);
-    if (minutes === null) {
-      continue;
-    }
-
-    const hour = Math.floor(minutes / 60);
-    minHour = minHour === null ? hour : Math.min(minHour, hour);
-    maxHour = maxHour === null ? hour : Math.max(maxHour, hour);
-    const label = `${String(hour).padStart(2, "0")}:00`;
-    const seats = occupied.get(trip.id)?.length ?? 0;
-    counts.set(label, (counts.get(label) ?? 0) + seats);
-  }
-
-  if (minHour === null || maxHour === null) {
-    return [];
-  }
-
-  const points: DemandPoint[] = [];
-  for (let hour = minHour; hour <= maxHour; hour += 1) {
-    const label = `${String(hour).padStart(2, "0")}:00`;
-    points.push({ hour: label, bookings: counts.get(label) ?? 0 });
-  }
-  return points;
-}
-
-function peakHours(demand: readonly DemandPoint[]): PeakDemand[] {
-  const highest = demand.reduce((max, point) => Math.max(max, point.bookings), 0);
-  if (highest === 0) {
-    return [];
-  }
-
-  return demand
-    .filter((point) => point.bookings === highest)
-    .map((point) => ({ hour: point.hour, bookings: point.bookings }));
 }
 
 function buildAlerts(
@@ -242,7 +191,7 @@ export function buildAdminDashboard(records: DashboardRecords, now = new Date())
     todaysBookings += occupied.get(trip.id)?.length ?? 0;
   }
 
-  const activeTrips = todayTrips.filter((trip) => ACTIVE_TRIP_STATUSES.has(trip.status)).length;
+  const activeTrips = todayTrips.filter((trip) => isActiveTrip(trip.status)).length;
   const cancelledTrips = todayTrips.filter((trip) => trip.status === "cancelled").length;
   const openSeats = todayTrips.reduce((total, trip) => {
     if (!OPEN_TRIP_STATUSES.has(trip.status)) {
@@ -252,19 +201,12 @@ export function buildAdminDashboard(records: DashboardRecords, now = new Date())
     return total + Math.max(0, trip.capacity - booked);
   }, 0);
 
-  const demand = buildDemand(todayTrips, occupied);
-  const peaks = peakHours(demand);
-
-  const utilization = new Map<string, { bookings: number; capacity: number }>();
-  for (const trip of todayTrips) {
-    if (trip.status === "cancelled") {
-      continue;
-    }
-    const current = utilization.get(trip.routeId) ?? { bookings: 0, capacity: 0 };
-    current.bookings += occupied.get(trip.id)?.length ?? 0;
-    current.capacity += trip.capacity;
-    utilization.set(trip.routeId, current);
-  }
+  const occupiedCounts = new Map(
+    [...occupied.entries()].map(([tripId, tripBookings]) => [tripId, tripBookings.length]),
+  );
+  const demand = hourlyDemand(todayTrips, occupiedCounts);
+  const peaks = peakDemand(demand);
+  const utilization = utilizationByRoute(todayTrips, occupiedCounts);
 
   const routeRows: RouteUtilizationRow[] = [...utilization.entries()]
     .map(([routeId, totals]) => {

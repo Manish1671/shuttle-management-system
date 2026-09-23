@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { AdminAnalytics } from "@/features/admin-analytics/admin-analytics";
 
 export const metadata: Metadata = {
-  title: "Analytics",
-  description: "Shuttle usage and peak-hour demand.",
+  title: "Transport Analytics",
+  description: "Understand shuttle demand, route utilization, occupancy, and operational performance.",
 };
 
 export default function AdminAnalyticsPage() {
-  return (
-    <PlaceholderPage
-      title="Analytics"
-      description="Peak hours and shuttle demand will be shown here so schedules can be adjusted."
-    />
-  );
+  return <AdminAnalytics />;
 }

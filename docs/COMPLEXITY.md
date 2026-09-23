@@ -98,3 +98,15 @@ Trips, routes, stops, drivers, vehicles, bookings, and schedules are loaded once
 | Filter and sort | O(t log t) | O(t) | Search matches trip, route, driver, and vehicle text. Sort is date, then departure, then id. |
 | Assignment list | O((d + v) · tᵈ log tᵈ) | O(d + v) | Each driver and vehicle is checked with the existing overlap scan for that day. `tᵈ` is trips on the chosen date. |
 | Save | O(t + bₜ) | O(t) | Driver and vehicle conflicts are compared before and after the candidate trip. `bₜ` is bookings on that trip, checked when the route changes. |
+
+## Transport analytics
+
+Trips, bookings, routes, drivers, and vehicles are loaded once. Bookings are counted by trip, then every chart reads that filtered set.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load | O(t + b + r + d + v) | O(t + b + r + d + v) | One pass over each collection. Charts do not reload them. |
+| Filter | O(t + b) | O(t) | Keeps trips in the service-date range and optional route, then the bookings on those trips. |
+| Hourly demand | O(t) | O(h) | Operating trips are grouped by departure hour. `h` is the hours from the earliest departure to the latest. |
+| Daily demand | O(t + days) | O(days) | Occupied seats are summed by service date, then each day in the range is filled, including zeros. |
+| Utilization | O(t + r) | O(r) | Occupied seats and capacity are summed per route, driver, and vehicle. |

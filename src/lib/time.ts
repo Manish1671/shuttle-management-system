@@ -46,6 +46,28 @@ export function formatDisplayDate(value: string): string {
   }).format(new Date(year, month - 1, day));
 }
 
+export function formatShortDate(value: string): string {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+  }).format(new Date(year, month - 1, day));
+}
+
+/** Moves a YYYY-MM-DD date by whole local calendar days. */
+export function addCalendarDays(value: string, days: number): string {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return todayDateString(new Date(year, month - 1, day + days));
+}
+
 export function hasDeparted(
   serviceDate: string,
   departureTime: string,

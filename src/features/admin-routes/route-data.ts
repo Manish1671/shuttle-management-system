@@ -1,4 +1,5 @@
 import { todayDateString } from "@/lib/time";
+import { formatUtilization } from "@/services/operations-metrics";
 import { occupiesSeat } from "@/lib/validation/domain";
 import { bookingService } from "@/services/booking-service";
 import { routeService } from "@/services/route-service";
@@ -10,14 +11,6 @@ import type { RouteFilters, RouteMetrics, RouteViewModel } from "./route-types";
 
 function indexById<T extends { id: string }>(records: readonly T[]): Map<string, T> {
   return new Map(records.map((record) => [record.id, record]));
-}
-
-function formatUtilization(booked: number, capacity: number): string {
-  if (capacity <= 0) {
-    return "—";
-  }
-  const percent = Math.round((booked / capacity) * 1000) / 10;
-  return Number.isInteger(percent) ? `${percent}%` : `${percent.toFixed(1)}%`;
 }
 
 export function loadRouteManagement(now = new Date()): { routes: RouteViewModel[]; stops: Stop[] } {

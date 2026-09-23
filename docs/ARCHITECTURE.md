@@ -176,6 +176,24 @@ A trip stores its own departure and arrival. When the route or departure changes
 
 Status moves forward only: scheduled, boarding, and in progress can advance or be cancelled. Completed and cancelled trips do not return to an earlier status. Cancelling keeps the trip and its bookings.
 
+### Transport analytics
+
+```
+/admin/analytics
+  ↓
+One load of trips, bookings, routes, drivers, and vehicles
+  ↓
+Filter by service date and route
+  ↓
+Shared operations metrics
+  ↓
+Charts and tables
+```
+
+`src/services/operations-metrics.ts` is the shared definition used by the operations dashboard and analytics. An operating trip is any trip that is not cancelled. An active trip is boarding or in progress. Demand counts bookings that occupy a seat, grouped by the departure hour or the service date. Peak hours are every hour tied for that highest count. Route utilization and average occupancy are occupied seats divided by capacity on operating trips. Cancellation rate is cancelled bookings divided by every booking on the filtered trips. Zero capacity or zero bookings display as "—".
+
+The analytics page does not forecast demand. Driver and vehicle sections count assigned trips. Assigned minutes are the sum of operating trip durations.
+
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication
