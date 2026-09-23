@@ -4,9 +4,9 @@ A smart campus shuttle management platform built as part of a frontend case stud
 
 ## Project Status
 
-Milestone 4 — Rider Booking Flow
+Milestone 5 — Rider Bookings & Trip History
 
-Students and staff can search campus shuttles and confirm a booking from `/book`. The booking is stored in the shared browser repository. Admin booking management, driver scheduling, route management, and analytics screens are not implemented yet.
+Students and staff can book a shuttle, view their reservations, open booking details, cancel an eligible booking, and review trip history. Admin booking management, driver scheduling, route management, and analytics screens are not implemented yet.
 
 ### Demo accounts
 

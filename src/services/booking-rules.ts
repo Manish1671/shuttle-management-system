@@ -202,3 +202,74 @@ export function prepareBooking(input: {
     },
   };
 }
+
+export type BookingSection = "upcoming" | "past" | "cancelled";
+
+export function classifyBooking(
+  booking: Pick<Booking, "status">,
+  trip: Pick<Trip, "status" | "serviceDate" | "departureTime"> | null,
+  now = new Date(),
+): BookingSection {
+  if (booking.status === "cancelled") {
+    return "cancelled";
+  }
+
+  if (!trip || booking.status === "completed" || trip.status === "completed" || trip.status === "cancelled") {
+    return "past";
+  }
+
+  if (trip.status === "in_progress" || trip.status === "boarding") {
+    return "upcoming";
+  }
+
+  if (trip.status === "scheduled" && !hasDeparted(trip.serviceDate, trip.departureTime, now)) {
+    return "upcoming";
+  }
+
+  return "past";
+}
+
+export function cancellationError(
+  booking: Pick<Booking, "id" | "userId" | "status"> | null,
+  trip: Pick<Trip, "status" | "serviceDate" | "departureTime"> | null,
+  userId: string,
+  now = new Date(),
+): ValidationError | null {
+  if (!booking) {
+    return { code: "BOOKING_NOT_FOUND", message: "This booking could not be found." };
+  }
+
+  if (booking.userId !== userId) {
+    return { code: "NOT_OWNER", message: "You can only cancel your own booking." };
+  }
+
+  if (booking.status === "cancelled") {
+    return { code: "ALREADY_CANCELLED", message: "This booking is already cancelled." };
+  }
+
+  if (booking.status === "completed" || trip?.status === "completed") {
+    return { code: "TRIP_COMPLETED", message: "This trip is already completed." };
+  }
+
+  if (!trip) {
+    return { code: "TRIP_NOT_FOUND", message: "This shuttle is no longer available." };
+  }
+
+  if (trip.status === "in_progress" || hasDeparted(trip.serviceDate, trip.departureTime, now)) {
+    return { code: "TRIP_STARTED", message: "This shuttle has already started." };
+  }
+
+  if (trip.status === "boarding") {
+    return { code: "TRIP_BOARDING", message: "This shuttle is already boarding." };
+  }
+
+  if (trip.status === "cancelled") {
+    return { code: "TRIP_CANCELLED", message: "This trip is no longer running." };
+  }
+
+  if (trip.status !== "scheduled") {
+    return { code: "NOT_CANCELLABLE", message: "This booking can no longer be cancelled." };
+  }
+
+  return null;
+}

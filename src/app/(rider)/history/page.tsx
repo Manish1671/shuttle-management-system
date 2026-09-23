@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { TripHistory } from "@/features/history/trip-history";
 
 export const metadata: Metadata = {
   title: "Trip History",
-  description: "Past campus shuttle trips for the signed-in rider.",
+  description: "Completed and cancelled campus shuttle trips.",
 };
 
 export default function TripHistoryPage() {
-  return (
-    <PlaceholderPage
-      title="Trip History"
-      description="Past trips will show the date, time, route, and driver."
-    />
-  );
+  return <TripHistory />;
 }

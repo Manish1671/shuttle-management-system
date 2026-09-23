@@ -37,3 +37,7 @@ Dataset integrity runs these checks across the seed once. That pass is O(n²) in
 | Duplicate booking | O(bₜ) | O(1) | Looks for a non-cancelled booking for the same user and trip. |
 | Pickup before drop-off | O(s) | O(1) | Two scans of the route's ordered stop list. |
 | Create booking | O(t + b) | O(b) | Re-reads trips and bookings, then appends one booking and rewrites both collections. |
+| User bookings | O(b + t) | O(bᵤ) | Scans bookings for one user, then resolves each related record from arrays already loaded once. |
+| Sort bookings | O(bᵤ log bᵤ) | O(bᵤ) | Compared by `YYYY-MM-DDTHH:mm`. Upcoming is ascending. History is descending. |
+| History filter | O(bᵤ) | O(bᵤ) | One pass over the rider's past and cancelled views. |
+| Cancel booking | O(b) | O(b) | Finds the booking, updates its status, recounts occupied seats, and rewrites both collections. |

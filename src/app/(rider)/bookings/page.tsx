@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { MyBookings } from "@/features/bookings/my-bookings";
 
 export const metadata: Metadata = {
   title: "My Bookings",
-  description: "Upcoming shuttle bookings for the signed-in rider.",
+  description: "View and manage your campus shuttle reservations.",
 };
 
 export default function MyBookingsPage() {
-  return (
-    <PlaceholderPage
-      title="My Bookings"
-      description="Upcoming shuttle bookings will be listed here."
-    />
-  );
+  return <MyBookings />;
 }

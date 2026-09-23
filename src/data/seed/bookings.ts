@@ -33,7 +33,7 @@ function buildForTrip(
   const lastIndex = route.stopIds.length - 1;
 
   return Array.from({ length: seatCount }, (_, seatIndex) => {
-    const rider = riders[(seatIndex + trip.id.length) % riders.length];
+    const rider = riders[seatIndex % riders.length];
     const pickupIndex = Math.min(seatIndex % lastIndex, lastIndex - 1);
     const pickupStopId = route.stopIds[pickupIndex] ?? route.stopIds[0];
     const dropoffStopId = route.stopIds[lastIndex] ?? pickupStopId;

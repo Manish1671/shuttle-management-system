@@ -5,14 +5,19 @@ import { RepositoryError } from "@/services/repository/collection";
 
 import {
   availableSeats,
+  cancellationError,
+  countOccupiedSeats,
   isTripBookable,
   prepareBooking,
   type CreateBookingRequest,
 } from "./booking-rules";
+import { notifyBookingsChanged } from "./booking-sync";
+import { toBookingViewModel, tripSortKey, type BookingViewModel } from "./booking-view";
 import {
   bookingRepository,
   driverRepository,
   routeRepository,
+  stopRepository,
   tripRepository,
   userRepository,
   vehicleRepository,
@@ -29,6 +34,16 @@ export type BookableTrip = {
 
 export type CreateBookingResult =
   | { ok: true; booking: Booking }
+  | { ok: false; errors: ValidationError[] };
+
+export type RiderBookings = {
+  upcoming: BookingViewModel[];
+  past: BookingViewModel[];
+  cancelled: BookingViewModel[];
+};
+
+export type BookingDetailsResult =
+  | { ok: true; booking: BookingViewModel }
   | { ok: false; errors: ValidationError[] };
 
 function bookingsForTrip(tripId: string, bookings: readonly Booking[]): Booking[] {
@@ -124,6 +139,7 @@ export const bookingService = {
         };
       }
 
+      notifyBookingsChanged();
       return { ok: true, booking: created };
     } catch (error) {
       if (error instanceof RepositoryError) {
@@ -133,6 +149,118 @@ export const bookingService = {
             {
               code: "REPOSITORY_FAILURE",
               message: "Unable to complete booking. Please try again.",
+            },
+          ],
+        };
+      }
+
+      throw error;
+    }
+  },
+
+  getBookingsForUser(userId: string, now = new Date()): RiderBookings {
+    const records = {
+      trips: tripRepository.getAll(),
+      routes: routeRepository.getAll(),
+      drivers: driverRepository.getAll(),
+      vehicles: vehicleRepository.getAll(),
+      stops: stopRepository.getAll(),
+      users: userRepository.getAll(),
+    };
+    const views = bookingRepository
+      .getAll()
+      .filter((booking) => booking.userId === userId)
+      .map((booking) => toBookingViewModel(booking, records, now));
+
+    const byTime = (left: BookingViewModel, right: BookingViewModel) =>
+      tripSortKey(left).localeCompare(tripSortKey(right));
+
+    return {
+      upcoming: views.filter((view) => view.section === "upcoming").sort(byTime),
+      past: views.filter((view) => view.section === "past").sort((left, right) => byTime(right, left)),
+      cancelled: views
+        .filter((view) => view.section === "cancelled")
+        .sort((left, right) => byTime(right, left)),
+    };
+  },
+
+  getBookingDetails(bookingId: string, userId: string, now = new Date()): BookingDetailsResult {
+    const booking = bookingRepository.getById(bookingId);
+    if (!booking || booking.userId !== userId) {
+      return {
+        ok: false,
+        errors: [{ code: "NOT_OWNER", message: "You can only view your own booking." }],
+      };
+    }
+
+    const grouped = this.getBookingsForUser(userId, now);
+    const view = [...grouped.upcoming, ...grouped.past, ...grouped.cancelled].find(
+      (item) => item.booking.id === bookingId,
+    );
+
+    if (!view) {
+      return {
+        ok: false,
+        errors: [{ code: "BOOKING_NOT_FOUND", message: "This booking could not be found." }],
+      };
+    }
+
+    return { ok: true, booking: view };
+  },
+
+  cancelBooking(bookingId: string, userId: string, now = new Date()): BookingDetailsResult {
+    const booking = bookingRepository.getById(bookingId);
+    const trip = booking ? tripRepository.getById(booking.tripId) : null;
+    const blocked = cancellationError(booking, trip, userId, now);
+
+    if (blocked || !booking) {
+      return {
+        ok: false,
+        errors: [
+          blocked ?? { code: "BOOKING_NOT_FOUND", message: "This booking could not be found." },
+        ],
+      };
+    }
+
+    try {
+      const updated = bookingRepository.update(booking.id, { status: "cancelled" });
+      if (!updated || !trip) {
+        return {
+          ok: false,
+          errors: [
+            {
+              code: "REPOSITORY_FAILURE",
+              message: "Unable to cancel this booking. Please try again.",
+            },
+          ],
+        };
+      }
+
+      const occupied = countOccupiedSeats(bookingsForTrip(trip.id, bookingRepository.getAll()));
+      const tripUpdated = tripRepository.update(trip.id, { bookedSeats: occupied });
+      if (!tripUpdated) {
+        bookingRepository.update(booking.id, { status: booking.status });
+        return {
+          ok: false,
+          errors: [
+            {
+              code: "REPOSITORY_FAILURE",
+              message: "Unable to cancel this booking. Please try again.",
+            },
+          ],
+        };
+      }
+
+      notifyBookingsChanged();
+      return this.getBookingDetails(updated.id, userId, now);
+    } catch (error) {
+      if (error instanceof RepositoryError) {
+        return {
+          ok: false,
+          errors: [
+            {
+              code: "REPOSITORY_FAILURE",
+              message: "Unable to cancel this booking. Please try again.",
             },
           ],
         };

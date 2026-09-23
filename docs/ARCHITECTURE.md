@@ -66,7 +66,23 @@ Repository
 localStorage
 ```
 
-A rider chooses a date, an active route, then a pickup and a later stop on that route. The search reads trips and bookings and does not write. Only `scheduled` and `boarding` trips with a free seat are shown. Completed, cancelled, in-progress, departed, and full trips are left out. Confirming calls `createBooking`, which checks the user, trip, route, stop order, duplicate booking, and remaining seats again before writing. The new record uses an id such as `BK-1001`. The trip's `bookedSeats` count is updated to match occupied seats. Admin booking screens are still placeholders; they will read the same repository later.
+A rider chooses a date, an active route, then a pickup and a later stop on that route. The search reads trips and bookings and does not write. Only `scheduled` and `boarding` trips with a free seat are shown. Completed, cancelled, in-progress, departed, and full trips are left out. Confirming calls `createBooking`, which checks the user, trip, route, stop order, duplicate booking, and remaining seats again before writing. The new record uses an id such as `BK-1001`. The trip's `bookedSeats` count is updated to match occupied seats.
+
+### Rider bookings and history
+
+```
+/bookings and /history
+  ↓
+Booking and history features
+  ↓
+bookingService.getBookingsForUser / cancelBooking
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept. Admin booking screens are still placeholders.
 
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 

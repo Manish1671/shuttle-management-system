@@ -30,7 +30,7 @@ export const STORAGE_KEYS = {
 } as const;
 
 /** Bump this when the seed shape changes so the browser reseeds. */
-export const SCHEMA_VERSION = "1";
+export const SCHEMA_VERSION = "2";
 
 let seeded = false;
 
