@@ -82,7 +82,7 @@ Repository
 localStorage
 ```
 
-The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept. Admin booking management is still a placeholder.
+The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept.
 
 ### Admin operations dashboard
 
@@ -101,6 +101,24 @@ localStorage
 The overview is read-only. It loads each collection once, then derives today's trips, booking counts, hourly demand, route utilization, and alerts. Cancelled bookings do not count as demand or toward seat totals. Active trips are `boarding` and `in_progress` only.
 
 Driver availability is derived for the service date. A driver on a boarding or in-progress trip is On trip. Otherwise the duty schedule and the current clock decide Available, On break, or Off duty. The stored `Driver.status` field is not used for this screen, so the dashboard stays aligned with the timetable.
+
+### Admin booking management
+
+```
+/admin/bookings
+  ↓
+Admin bookings feature
+  ↓
+bookingService.getAll / cancelBookingForAdmin
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+The page loads bookings, trips, routes, stops, drivers, vehicles, and users once, then builds one view per booking from id maps. Search, status, date, and route filters run on that list. Summary counts use the full list: confirmed excludes cancelled, and today's count uses the trip service date.
+
+`cancelBookingForAdmin` applies the same eligibility rules as a rider cancellation and skips the passenger-ownership check. It sets the booking to `cancelled`, recounts `bookedSeats`, and keeps the record. Rider My Bookings and the admin dashboard read that same write.
 
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 

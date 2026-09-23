@@ -54,3 +54,14 @@ The overview reads each collection once, builds id maps, and groups non-cancelle
 | Peak hour | O(h) | O(h) | Every hour that matches the highest non-zero count is returned, so a tie stays a tie. |
 | Route utilization | O(t) | O(r) | Non-cancelled trips are summed by route. Cancelled trips are left out of both bookings and capacity. |
 | Driver status summary | O(d) | O(d) | Each driver is classified from today's trips and that driver's schedule. The stored driver status is not read. |
+
+## Admin booking management
+
+Collections are read once and indexed by id. Each booking is resolved from those maps, so related records are not looked up again per table row.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load and resolve | O(b + n) | O(b + n) | `b` bookings and `n` related records. One map lookup per relationship. |
+| Filter | O(b) | O(b) | Search, status, trip date, and route are one pass. The input is already sorted. |
+| Sort | O(b log b) | O(b) | Newest trip date first, then later departure, then booking id. |
+| Admin cancel | O(b) | O(b) | Same write as a rider cancel: status update, occupied-seat recount, both collections rewritten. |

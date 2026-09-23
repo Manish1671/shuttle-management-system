@@ -46,8 +46,61 @@ export type BookingDetailsResult =
   | { ok: true; booking: BookingViewModel }
   | { ok: false; errors: ValidationError[] };
 
+export type CancelBookingResult =
+  | { ok: true }
+  | { ok: false; errors: ValidationError[] };
+
 function bookingsForTrip(tripId: string, bookings: readonly Booking[]): Booking[] {
   return bookings.filter((booking) => booking.tripId === tripId);
+}
+
+function commitCancellation(booking: Booking, trip: Trip): CancelBookingResult {
+  try {
+    const updated = bookingRepository.update(booking.id, { status: "cancelled" });
+    if (!updated) {
+      return {
+        ok: false,
+        errors: [
+          {
+            code: "REPOSITORY_FAILURE",
+            message: "Unable to cancel this booking. Please try again.",
+          },
+        ],
+      };
+    }
+
+    const occupied = countOccupiedSeats(bookingsForTrip(trip.id, bookingRepository.getAll()));
+    const tripUpdated = tripRepository.update(trip.id, { bookedSeats: occupied });
+    if (!tripUpdated) {
+      bookingRepository.update(booking.id, { status: booking.status });
+      return {
+        ok: false,
+        errors: [
+          {
+            code: "REPOSITORY_FAILURE",
+            message: "Unable to cancel this booking. Please try again.",
+          },
+        ],
+      };
+    }
+
+    notifyBookingsChanged();
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof RepositoryError) {
+      return {
+        ok: false,
+        errors: [
+          {
+            code: "REPOSITORY_FAILURE",
+            message: "Unable to cancel this booking. Please try again.",
+          },
+        ],
+      };
+    }
+
+    throw error;
+  }
 }
 
 export const bookingService = {
@@ -213,7 +266,7 @@ export const bookingService = {
     const trip = booking ? tripRepository.getById(booking.tripId) : null;
     const blocked = cancellationError(booking, trip, userId, now);
 
-    if (blocked || !booking) {
+    if (blocked || !booking || !trip) {
       return {
         ok: false,
         errors: [
@@ -222,51 +275,32 @@ export const bookingService = {
       };
     }
 
-    try {
-      const updated = bookingRepository.update(booking.id, { status: "cancelled" });
-      if (!updated || !trip) {
-        return {
-          ok: false,
-          errors: [
-            {
-              code: "REPOSITORY_FAILURE",
-              message: "Unable to cancel this booking. Please try again.",
-            },
-          ],
-        };
-      }
-
-      const occupied = countOccupiedSeats(bookingsForTrip(trip.id, bookingRepository.getAll()));
-      const tripUpdated = tripRepository.update(trip.id, { bookedSeats: occupied });
-      if (!tripUpdated) {
-        bookingRepository.update(booking.id, { status: booking.status });
-        return {
-          ok: false,
-          errors: [
-            {
-              code: "REPOSITORY_FAILURE",
-              message: "Unable to cancel this booking. Please try again.",
-            },
-          ],
-        };
-      }
-
-      notifyBookingsChanged();
-      return this.getBookingDetails(updated.id, userId, now);
-    } catch (error) {
-      if (error instanceof RepositoryError) {
-        return {
-          ok: false,
-          errors: [
-            {
-              code: "REPOSITORY_FAILURE",
-              message: "Unable to cancel this booking. Please try again.",
-            },
-          ],
-        };
-      }
-
-      throw error;
+    const committed = commitCancellation(booking, trip);
+    if (!committed.ok) {
+      return committed;
     }
+
+    return this.getBookingDetails(booking.id, userId, now);
+  },
+
+  /**
+   * Transport-office cancellation. Uses the same eligibility rules as a rider
+   * cancel, without requiring the caller to be the passenger.
+   */
+  cancelBookingForAdmin(bookingId: string, now = new Date()): CancelBookingResult {
+    const booking = bookingRepository.getById(bookingId);
+    const trip = booking ? tripRepository.getById(booking.tripId) : null;
+    const blocked = cancellationError(booking, trip, booking?.userId ?? "", now);
+
+    if (blocked || !booking || !trip) {
+      return {
+        ok: false,
+        errors: [
+          blocked ?? { code: "BOOKING_NOT_FOUND", message: "This booking could not be found." },
+        ],
+      };
+    }
+
+    return commitCancellation(booking, trip);
   },
 };

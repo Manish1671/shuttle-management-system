@@ -4,9 +4,9 @@ A smart campus shuttle management platform built as part of a frontend case stud
 
 ## Project Status
 
-Milestone 6 — Admin Operations Dashboard
+Milestone 7 — Admin Booking Management
 
-Students and staff can book a shuttle, view their reservations, open booking details, cancel an eligible booking, and review trip history. The transport office overview at `/admin` is a read-only snapshot of the same trips, bookings, drivers, and vehicles: today's timetable, demand by hour, route utilization, and attention items. Admin booking management, driver scheduling, route management, and trip editing are not implemented yet.
+Students and staff can book a shuttle, view their reservations, open booking details, cancel an eligible booking, and review trip history. The transport office overview at `/admin` summarizes the same data. `/admin/bookings` lists every booking, with search, filters, details, and cancellation through the shared booking service. Driver scheduling, route management, trip editing, vehicles, and analytics are not implemented yet.
 
 ### Demo accounts
 
