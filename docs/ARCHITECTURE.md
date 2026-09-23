@@ -30,7 +30,7 @@ Browser
               └── /admin/analytics
 ```
 
-`/dashboard` and `/admin/vehicles` are still placeholders. The other rider and admin routes are working screens over the same local dataset.
+`/admin/vehicles` is still a placeholder. The rider dashboard and the other rider and admin routes are working screens over the same local dataset.
 
 ### Domain data
 
@@ -83,6 +83,8 @@ localStorage
 ```
 
 The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept.
+
+`/dashboard` uses that same `getBookingsForUser` result. It shows the nearest upcoming booking, counts for upcoming, past, and cancelled bookings, and the three newest finished or cancelled trips. It does not write.
 
 ### Admin operations dashboard
 
@@ -236,7 +238,7 @@ React Hook Form and Zod validate the booking search form. Redux, Zustand, a data
 
 | Layer | Path | Responsibility |
 | --- | --- | --- |
-| Routes | `src/app` | Pages and layouts. `/dashboard` and `/admin/vehicles` are placeholders. |
+| Routes | `src/app` | Pages and layouts. `/admin/vehicles` is a placeholder. |
 | UI | `src/components` | Shared layout and visual primitives |
 | Features | `src/features` | Screen modules for auth, booking, history, and each admin area |
 | Services | `src/services` | Domain reads, writes, and validation |

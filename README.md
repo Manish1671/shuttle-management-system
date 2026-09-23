@@ -21,7 +21,7 @@ Admin:
 - Trip management with driver and vehicle assignment
 - Transport analytics
 
-`/dashboard` and `/admin/vehicles` are placeholders.
+`/admin/vehicles` is a placeholder. The rider dashboard shows the signed-in rider's next ride and booking counts.
 
 ## Tech Stack
 
@@ -76,7 +76,7 @@ Rider:
 - `/book`
 - `/bookings`
 - `/history`
-- `/dashboard` (placeholder)
+- `/dashboard`
 
 Admin:
 
@@ -128,6 +128,6 @@ npm run validate:seed
 
 - Frontend only. Persistence is `localStorage`, not a database or API.
 - Sign-in is a demo account picker.
-- The rider dashboard and vehicle management page are placeholders.
+- Vehicle management (`/admin/vehicles`) is a placeholder.
 - There is no live GPS, payments, notifications, or production deployment.
 - Tests cover domain rules. They do not drive the browser.
