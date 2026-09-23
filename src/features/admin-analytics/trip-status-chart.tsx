@@ -11,7 +11,8 @@ export function TripStatusChart({ statuses }: { statuses: StatusCount[] }) {
     <DashboardPanel title="Trip status" description="Every trip in the selected period, including cancelled trips.">
       <figure>
         <figcaption className="sr-only">Trip counts by status</figcaption>
-        <table className="sr-only">
+        <div className="sr-only">
+        <table>
           <caption>Trips by status</caption>
           <thead>
             <tr>
@@ -28,17 +29,19 @@ export function TripStatusChart({ statuses }: { statuses: StatusCount[] }) {
             ))}
           </tbody>
         </table>
+        </div>
         <div className="h-56 w-full" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={statuses} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <BarChart data={statuses} margin={{ top: 8, right: 8, left: 0, bottom: 28 }}>
               <CartesianGrid stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} interval={0} label={{ value: "Status", position: "insideBottom", offset: -2, fill: "var(--muted-foreground)", fontSize: 12 }} />
-              <YAxis allowDecimals={false} width={32} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} label={{ value: "Trips", angle: -90, position: "insideLeft", fill: "var(--muted-foreground)", fontSize: 12 }} />
+              <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={48} />
+              <YAxis allowDecimals={false} width={36} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
               <Tooltip cursor={{ fill: "var(--secondary)" }} formatter={(value) => [`${value ?? 0} trips`, "Trips"]} />
               <Bar dataKey="count" fill="var(--chart-3)" radius={[4, 4, 0, 0]} name="Trips" />
             </BarChart>
           </ResponsiveContainer>
         </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">Status across, trip count up.</p>
       </figure>
     </DashboardPanel>
   );

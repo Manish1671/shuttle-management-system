@@ -15,7 +15,7 @@ export function TodayTrips({ trips }: { trips: TodayTripRow[] }) {
           description="Trips scheduled for this service date will appear here."
         />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <caption className="sr-only">Today&apos;s shuttle trips</caption>
             <thead>

@@ -19,7 +19,7 @@ export function TripOccupancyTable({ rows }: { rows: OccupancyRow[] }) {
       {rows.length === 0 ? (
         <DashboardEmpty title="No trips available." description="Occupancy appears when the period includes operating trips." />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[44rem] text-left text-sm">
             <caption className="sr-only">Trip occupancy</caption>
             <thead>

@@ -30,7 +30,8 @@ export function DemandChart({
             <figcaption id="hourly-demand-caption" className="sr-only">
               Booking counts by departure hour
             </figcaption>
-            <table className="sr-only">
+            <div className="sr-only">
+            <table>
               <caption>Bookings by hour</caption>
               <thead>
                 <tr>
@@ -47,6 +48,7 @@ export function DemandChart({
                 ))}
               </tbody>
             </table>
+            </div>
             <div className="h-56 w-full" aria-hidden="true">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={demand} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>

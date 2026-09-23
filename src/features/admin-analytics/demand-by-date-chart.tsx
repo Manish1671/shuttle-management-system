@@ -19,7 +19,8 @@ export function DemandByDateChart({ points }: { points: AnalyticsDatePoint[] }) 
       ) : (
         <figure>
           <figcaption className="sr-only">Booking counts by service date</figcaption>
-          <table className="sr-only">
+          <div className="sr-only">
+          <table>
             <caption>Bookings by date</caption>
             <thead>
               <tr>
@@ -36,17 +37,19 @@ export function DemandByDateChart({ points }: { points: AnalyticsDatePoint[] }) 
               ))}
             </tbody>
           </table>
+          </div>
           <div className="h-56 w-full" aria-hidden="true">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
                 <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} interval="preserveStartEnd" label={{ value: "Service date", position: "insideBottom", offset: -2, fill: "var(--muted-foreground)", fontSize: 12 }} />
-                <YAxis allowDecimals={false} width={32} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} label={{ value: "Bookings", angle: -90, position: "insideLeft", fill: "var(--muted-foreground)", fontSize: 12 }} />
+                <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} interval="preserveStartEnd" />
+                <YAxis allowDecimals={false} width={36} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                 <Tooltip cursor={{ fill: "var(--secondary)" }} formatter={(value) => [`${value ?? 0} bookings`, "Demand"]} />
                 <Bar dataKey="bookings" fill="var(--chart-2)" radius={[4, 4, 0, 0]} name="Bookings" />
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">Service date across, bookings up.</p>
         </figure>
       )}
     </DashboardPanel>

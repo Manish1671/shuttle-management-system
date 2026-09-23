@@ -52,12 +52,12 @@ export function AppShell({ items, sectionLabel, children }: AppShellProps) {
           />
         </SheetContent>
       </Sheet>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
         <Topbar
           title={titleForPath(pathname)}
           onOpenNavigation={() => setMobileOpen(true)}
         />
-        <main className="flex-1 px-4 py-6 md:px-6">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-6 md:px-6">{children}</main>
       </div>
     </div>
   );

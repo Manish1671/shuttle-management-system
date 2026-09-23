@@ -13,7 +13,7 @@ export function RouteUtilization({ routes }: { routes: RouteUtilizationRow[] }) 
           description="Utilization appears when today's trips are operating."
         />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[28rem] text-left text-sm">
             <caption className="sr-only">Route utilization for today</caption>
             <thead>

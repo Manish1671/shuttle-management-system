@@ -43,34 +43,36 @@ export function RouteStopEditor({
           {stopIds.map((stopId, index) => {
             const stop = byId.get(stopId);
             return (
-              <li key={`${stopId}-${index}`} className="flex items-center gap-2 rounded-md border border-border px-3 py-2">
-                <span className="w-6 text-sm font-medium text-muted-foreground">{index + 1}</span>
-                <span className="min-w-0 flex-1 text-sm">
+              <li key={`${stopId}-${index}`} className="grid grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-2 rounded-md border border-border px-3 py-2 sm:flex">
+                <span className="text-sm font-medium text-muted-foreground">{index + 1}</span>
+                <span className="min-w-0 text-sm sm:flex-1">
                   <span className="font-medium">{stop?.name ?? "Unknown stop"}</span>
                   {stop && !stop.active ? (
                     <span className="ml-2 text-xs text-muted-foreground">Inactive</span>
                   ) : null}
                 </span>
-                <Button type="button" variant="outline" size="sm" disabled={index === 0} onClick={() => move(index, -1)}>
-                  Move up
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={index === stopIds.length - 1}
-                  onClick={() => move(index, 1)}
-                >
-                  Move down
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onChange(stopIds.filter((id) => id !== stopId))}
-                >
-                  Remove
-                </Button>
+                <div className="col-span-2 flex flex-wrap gap-2 sm:col-span-1">
+                  <Button type="button" variant="outline" size="sm" disabled={index === 0} onClick={() => move(index, -1)}>
+                    Move up
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={index === stopIds.length - 1}
+                    onClick={() => move(index, 1)}
+                  >
+                    Move down
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onChange(stopIds.filter((id) => id !== stopId))}
+                  >
+                    Remove
+                  </Button>
+                </div>
               </li>
             );
           })}

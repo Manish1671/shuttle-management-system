@@ -12,7 +12,7 @@ export function BookingTable({
   onView: (row: AdminBookingRow) => void;
 }) {
   return (
-    <div className="hidden overflow-x-auto md:block">
+    <div className="hidden min-w-0 max-w-full overflow-x-auto md:block">
       <table className="w-full min-w-[64rem] text-left text-sm">
         <caption className="sr-only">Campus shuttle bookings</caption>
         <thead>

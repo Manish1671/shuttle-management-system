@@ -85,7 +85,7 @@ export function TripForm({
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="mb-1.5 block font-medium">Date</span>
+          <span className="mb-1.5 block font-medium">Date <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only"> required</span></span>
           <input
             className={fieldClassName}
             type="date"
@@ -95,7 +95,7 @@ export function TripForm({
           />
         </label>
         <label className="text-sm">
-          <span className="mb-1.5 block font-medium">Departure</span>
+          <span className="mb-1.5 block font-medium">Departure <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only"> required</span></span>
           <input
             className={fieldClassName}
             type="time"
@@ -106,7 +106,7 @@ export function TripForm({
         </label>
       </div>
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium">Route</span>
+        <span className="mb-1.5 block font-medium">Route <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only"> required</span></span>
         <select className={fieldClassName} value={routeId} onChange={(event) => setRouteId(event.target.value)}>
           {activeRoutes.length === 0 ? <option value="">No active routes</option> : null}
           {activeRoutes.map((item) => (

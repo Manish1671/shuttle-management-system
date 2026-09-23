@@ -12,7 +12,8 @@ export function RouteUtilizationChart({ routes }: { routes: AnalyticsRouteRow[] 
         <DashboardEmpty title="No trips available." description="Route utilization appears when the period includes trips." />
       ) : (
         <div className="grid gap-3">
-          <table className="sr-only">
+          <div className="sr-only">
+          <table>
             <caption>Route utilization</caption>
             <thead>
               <tr>
@@ -35,6 +36,7 @@ export function RouteUtilizationChart({ routes }: { routes: AnalyticsRouteRow[] 
               ))}
             </tbody>
           </table>
+          </div>
           <ul className="grid gap-3">
             {routes.map((route) => (
               <li key={route.routeId}>

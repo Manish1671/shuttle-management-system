@@ -32,7 +32,7 @@ export function DriverTable({
 }) {
   return (
     <>
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden min-w-0 max-w-full overflow-x-auto md:block">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <caption className="sr-only">Campus shuttle drivers</caption>
           <thead>

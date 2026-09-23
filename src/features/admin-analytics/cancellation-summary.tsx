@@ -37,7 +37,7 @@ export function CancellationSummary({
             </div>
           </dl>
           {routes.length === 0 ? null : (
-            <div className="overflow-x-auto">
+            <div className="min-w-0 max-w-full overflow-x-auto">
               <table className="w-full min-w-[28rem] text-left text-sm">
                 <caption className="sr-only">Cancellations by route</caption>
                 <thead>

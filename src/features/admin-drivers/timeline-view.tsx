@@ -17,13 +17,17 @@ export function TimelineLegend() {
     { kind: "on_trip", label: "On trip" },
     { kind: "on_break", label: "On break" },
     { kind: "off_duty", label: "Off duty" },
+    { kind: "on_trip", label: "Conflict" },
   ];
 
   return (
     <ul className="flex flex-wrap gap-3 text-xs">
       {items.map((item) => (
-        <li key={item.kind} className="inline-flex items-center gap-1.5">
-          <span className={`size-3 rounded-sm border ${segmentClass[item.kind]}`} aria-hidden="true" />
+        <li key={item.label} className="inline-flex items-center gap-1.5">
+          <span
+            className={`size-3 rounded-sm border ${segmentClass[item.kind]} ${item.label === "Conflict" ? "ring-2 ring-destructive" : ""}`}
+            aria-hidden="true"
+          />
           {item.label}
         </li>
       ))}
@@ -33,7 +37,8 @@ export function TimelineLegend() {
 
 export function DriverTimeline({ model }: { model: TimelineModel }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="min-w-0 max-w-full overflow-x-auto">
+      <p className="mb-2 text-xs text-muted-foreground md:hidden">Scroll sideways to see the full day.</p>
       <div className="min-w-[44rem]">
         <div className="grid grid-cols-[5.5rem_1fr] gap-2">
           <span className="sr-only">Time</span>
@@ -54,17 +59,23 @@ export function DriverTimeline({ model }: { model: TimelineModel }) {
 
 export function TimeAxis({ model }: { model: TimelineModel }) {
   const span = model.end - model.start;
+  const first = model.hours[0];
+  const last = model.hours[model.hours.length - 1];
   return (
     <div className="relative h-5" aria-hidden="true">
-      {model.hours.map((hour) => (
-        <span
-          key={hour}
-          className="absolute top-0 -translate-x-1/2 text-[11px] text-muted-foreground"
-          style={{ left: `${((hour - model.start) / span) * 100}%` }}
-        >
-          {formatMinutes(hour).slice(0, 2)}
-        </span>
-      ))}
+      {model.hours.map((hour) => {
+        const atStart = hour === first;
+        const atEnd = hour === last && !atStart;
+        return (
+          <span
+            key={hour}
+            className={`absolute top-0 text-[11px] text-muted-foreground ${atStart || atEnd ? "" : "-translate-x-1/2"}`}
+            style={atEnd ? { right: 0 } : { left: atStart ? 0 : `${((hour - model.start) / span) * 100}%` }}
+          >
+            {formatMinutes(hour).slice(0, 2)}
+          </span>
+        );
+      })}
     </div>
   );
 }

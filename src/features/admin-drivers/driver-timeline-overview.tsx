@@ -27,7 +27,8 @@ export function DriverTimelineOverview({
         </div>
         <TimelineLegend />
       </div>
-      <div className="mt-4 overflow-x-auto">
+      <p className="mt-3 text-xs text-muted-foreground md:hidden">Scroll sideways to see the full day.</p>
+      <div className="mt-2 min-w-0 max-w-full overflow-x-auto md:mt-4">
         <div className="min-w-[44rem]">
           <div className="grid grid-cols-[9rem_1fr] gap-2">
             <span className="sr-only">Time</span>

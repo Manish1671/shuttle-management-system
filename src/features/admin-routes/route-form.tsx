@@ -63,11 +63,11 @@ export function RouteForm({
       }}
     >
       <label className="text-sm">
-        <span className="mb-1.5 block font-medium">Route name</span>
+        <span className="mb-1.5 block font-medium">Route name <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only"> required</span></span>
         <input className={fieldClassName} value={name} onChange={(event) => setName(event.target.value)} />
       </label>
       <label className="text-sm">
-        <span className="mb-1.5 block font-medium">Route code</span>
+        <span className="mb-1.5 block font-medium">Route code <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only"> required</span></span>
         <input className={fieldClassName} value={code} onChange={(event) => setCode(event.target.value)} />
       </label>
       <label className="text-sm">

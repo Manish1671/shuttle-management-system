@@ -24,7 +24,7 @@ export function RecentBookings({ bookings }: { bookings: RecentBookingRow[] }) {
           description="New shuttle reservations will appear here."
         />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[44rem] text-left text-sm">
             <caption className="sr-only">Recent shuttle bookings</caption>
             <thead>

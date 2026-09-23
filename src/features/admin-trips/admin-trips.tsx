@@ -104,6 +104,11 @@ export function AdminTrips() {
                   ? "No trips scheduled."
                   : "No trips match your current filters."}
               </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {ready.trips.length === 0
+                  ? "Trips you schedule will appear here."
+                  : "Change the date, status, route, driver, or vehicle filter."}
+              </p>
             </div>
           ) : (
             <TripTable trips={visible} onView={setSelectedId} />

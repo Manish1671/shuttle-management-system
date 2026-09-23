@@ -11,7 +11,7 @@ export function DriverUtilization({ drivers }: { drivers: DriverUsageRow[] }) {
       {drivers.length === 0 ? (
         <DashboardEmpty title="No trips available." description="Driver assignments appear when trips fall in this period." />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[36rem] text-left text-sm">
             <caption className="sr-only">Trips assigned to each driver</caption>
             <thead>

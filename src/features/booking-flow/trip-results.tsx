@@ -23,7 +23,7 @@ export function TripResults({
       <section className="mt-6 rounded-lg border border-dashed border-border bg-card px-6 py-10 text-center">
         <h2 className="text-lg font-semibold">No shuttles available</h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-          There are no available shuttles for this route and date.
+          No trips match this date, route, and stop pair. Change the search and try again.
         </p>
         <Button type="button" variant="outline" className="mt-5 h-11" onClick={onChangeSearch}>
           Change search

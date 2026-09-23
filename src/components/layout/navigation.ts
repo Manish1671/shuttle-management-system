@@ -43,9 +43,9 @@ const pageTitles: Record<string, string> = {
   "/admin/bookings": "Booking Management",
   "/admin/drivers": "Driver Management",
   "/admin/routes": "Route Management",
-  "/admin/trips": "Trips",
+  "/admin/trips": "Trip Management",
   "/admin/vehicles": "Vehicles",
-  "/admin/analytics": "Analytics",
+  "/admin/analytics": "Transport Analytics",
 };
 
 export function isNavItemActive(pathname: string, href: string): boolean {

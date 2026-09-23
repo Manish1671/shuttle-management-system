@@ -15,15 +15,19 @@ export function DriverScheduleEditor({ view, date }: { view: DriverDayView; date
   const [dutyStart, setDutyStart] = useState(view.schedule?.dutyStart ?? "07:00");
   const [dutyEnd, setDutyEnd] = useState(view.schedule?.dutyEnd ?? "16:00");
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const { pending, run } = useWriteGuard();
 
   function save() {
     run(() => {
       setError(null);
+      setSaved(false);
       const result = scheduleService.saveDuty(view.driver.id, date, dutyStart, dutyEnd);
       if (!result.ok) {
         setError(result.errors[0]?.message ?? "Unable to save this schedule.");
+        return;
       }
+      setSaved(true);
     });
   }
 
@@ -50,6 +54,11 @@ export function DriverScheduleEditor({ view, date }: { view: DriverDayView; date
       {error ? (
         <p role="alert" className="mt-2 text-sm text-destructive">
           {error}
+        </p>
+      ) : null}
+      {saved ? (
+        <p role="status" className="mt-2 text-sm text-muted-foreground">
+          Duty saved.
         </p>
       ) : null}
       <Button type="button" className="mt-3" disabled={pending} onClick={save}>

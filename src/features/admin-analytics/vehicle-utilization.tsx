@@ -11,7 +11,7 @@ export function VehicleUtilization({ vehicles }: { vehicles: VehicleUsageRow[] }
       {vehicles.length === 0 ? (
         <DashboardEmpty title="No trips available." description="Vehicle assignments appear when trips fall in this period." />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="min-w-0 max-w-full overflow-x-auto">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <caption className="sr-only">Trips assigned to each vehicle</caption>
             <thead>
