@@ -156,6 +156,26 @@ A route keeps an ordered `stopIds` list. That order is what rider booking uses t
 
 `saveRoute` checks the route shape with `validateRouteStops`, then refuses an order that would put an active booking's pickup at or after its destination. Deactivating a route leaves it in storage and hides it from new booking. The booking catalog rebuilds when route data changes, and it only offers active routes. Inactive stops are left off the new-booking stop list. Historical bookings still resolve the stop by id.
 
+### Trip management
+
+```
+/admin/trips
+  ↓
+Trip feature
+  ↓
+tripService.saveTrip / tripService.setTripStatus
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+A trip stores its own departure and arrival. When the route or departure changes, arrival is departure plus that route's `estimatedDurationMinutes`, using `addMinutesToTime`. Conflict checks use that same interval. `bookedSeats` is recounted from non-cancelled bookings and is not edited in the form. Capacity is the assigned vehicle's capacity.
+
+`saveTrip` refuses an inactive route or an out-of-service vehicle on a new assignment, a driver conflict from `findDriverAssignmentConflicts`, and a vehicle overlap from `validateVehicleTripOverlap`. Only conflicts introduced by the trip being saved are enforced, so an unrelated existing assignment does not block a clean slot. A route change is rejected when a non-cancelled booking would lose a valid pickup-before-destination pair. Those bookings are not rewritten.
+
+Status moves forward only: scheduled, boarding, and in progress can advance or be cancelled. Completed and cancelled trips do not return to an earlier status. Cancelling keeps the trip and its bookings.
+
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication

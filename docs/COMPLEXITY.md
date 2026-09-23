@@ -87,3 +87,14 @@ Routes, stops, trips, and bookings are loaded once. Trips are grouped by route a
 | Search and filter | O(r · p) | O(r) | `p` is the stops on a route. Matching includes the route name, code, and stop names. |
 | Route usage | O(t + b) | O(t) | Today's trips, later trips, and non-cancelled bookings are counted while the view is built. |
 | Reorder or save | O(s + bᵣ) | O(s) | The new `stopIds` list is validated, then active bookings on that route are checked for pickup order. `bᵣ` is bookings on the route's open trips. |
+
+## Trip management
+
+Trips, routes, stops, drivers, vehicles, bookings, and schedules are loaded once and indexed. Each trip row is then a map lookup.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load trips | O(t + r + s + d + v + b) | O(t + r + s + d + v) | Booked seats are counted in one pass over bookings. |
+| Filter and sort | O(t log t) | O(t) | Search matches trip, route, driver, and vehicle text. Sort is date, then departure, then id. |
+| Assignment list | O((d + v) · tᵈ log tᵈ) | O(d + v) | Each driver and vehicle is checked with the existing overlap scan for that day. `tᵈ` is trips on the chosen date. |
+| Save | O(t + bₜ) | O(t) | Driver and vehicle conflicts are compared before and after the candidate trip. `bₜ` is bookings on that trip, checked when the route changes. |

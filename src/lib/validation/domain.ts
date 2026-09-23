@@ -372,3 +372,37 @@ export function validateVehicleTripOverlap(
     findTripOverlaps(trips, "VEHICLE_TRIP_OVERLAP", `Vehicle ${vehicleId}`),
   );
 }
+
+const NEXT_TRIP_STATUS: Record<Trip["status"], readonly Trip["status"][]> = {
+  scheduled: ["boarding", "in_progress", "completed", "cancelled"],
+  boarding: ["in_progress", "completed", "cancelled"],
+  in_progress: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+};
+
+const TRIP_STATUS_LABEL: Record<Trip["status"], string> = {
+  scheduled: "scheduled",
+  boarding: "boarding",
+  in_progress: "in progress",
+  completed: "completed",
+  cancelled: "cancelled",
+};
+
+export function nextTripStatuses(status: Trip["status"]): Trip["status"][] {
+  return [...NEXT_TRIP_STATUS[status]];
+}
+
+export function tripStatusTransitionError(
+  from: Trip["status"],
+  to: Trip["status"],
+): ValidationError | null {
+  if (from === to || NEXT_TRIP_STATUS[from].includes(to)) {
+    return null;
+  }
+
+  return error(
+    "TRIP_STATUS",
+    `A ${TRIP_STATUS_LABEL[from]} trip cannot change to ${TRIP_STATUS_LABEL[to]}.`,
+  );
+}

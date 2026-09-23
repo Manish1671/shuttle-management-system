@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { AdminTrips } from "@/features/admin-trips/admin-trips";
 
 export const metadata: Metadata = {
-  title: "Trips",
-  description: "Scheduled shuttle trips and driver assignments.",
+  title: "Trip Management",
+  description: "Schedule shuttle trips, assign drivers and vehicles, and monitor trip capacity.",
 };
 
 export default function AdminTripsPage() {
-  return (
-    <PlaceholderPage
-      title="Trips"
-      description="Scheduled trips and the drivers assigned to them will appear here."
-    />
-  );
+  return <AdminTrips />;
 }

@@ -73,6 +73,24 @@ export function formatMinutes(total: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+/**
+ * Clock time after a duration on the same local day.
+ * Returns null when the start is not HH:mm or the result would pass midnight.
+ */
+export function addMinutesToTime(start: string, minutes: number): string | null {
+  const startMinutes = parseTimeToMinutes(start);
+  if (startMinutes === null || !Number.isInteger(minutes) || minutes < 1) {
+    return null;
+  }
+
+  const end = startMinutes + minutes;
+  if (end >= 24 * 60) {
+    return null;
+  }
+
+  return formatMinutes(end);
+}
+
 /** Returns minutes from midnight, or null when the value is not HH:mm. */
 export function parseTimeToMinutes(value: string): number | null {
   if (!isTimeString(value)) {

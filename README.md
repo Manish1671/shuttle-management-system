@@ -4,9 +4,9 @@ A smart campus shuttle management platform built as part of a frontend case stud
 
 ## Project Status
 
-Milestone 9 — Route and Stop Management
+Milestone 10 — Trip Management
 
-Students and staff can book a shuttle, view reservations, and cancel eligible bookings. The transport office can review operations, manage bookings, manage driver availability, and manage routes and ordered stops. Trip editing, vehicles, and analytics are not implemented yet.
+Students and staff can book a shuttle, view reservations, and cancel eligible bookings. The transport office can review operations, manage bookings, manage driver availability, manage routes and stops, and schedule trips with driver and vehicle assignment. Vehicle management and analytics are not implemented yet.
 
 ### Demo accounts
 
