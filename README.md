@@ -4,9 +4,9 @@ A smart campus shuttle management platform built as part of a frontend case stud
 
 ## Project Status
 
-Milestone 2 — Application Shell & Demo Role Selection
+Milestone 4 — Rider Booking Flow
 
-The app has a demo sign-in screen, a rider shell, and an admin shell. Protected routes redirect until a demo account is selected. Shuttle booking, trip history, driver scheduling, routes, and analytics are not implemented yet.
+Students and staff can search campus shuttles and confirm a booking from `/book`. The booking is stored in the shared browser repository. Admin booking management, driver scheduling, route management, and analytics screens are not implemented yet.
 
 ### Demo accounts
 

@@ -1,0 +1,78 @@
+import type { Route } from "@/types/route";
+
+export const routes: Route[] = [
+  {
+    id: "route_r01",
+    name: "North Academic Loop",
+    code: "R-01",
+    description: "Morning connection from the gate through hostels to the library.",
+    stopIds: [
+      "stop_main_gate",
+      "stop_hostel_a",
+      "stop_academic",
+      "stop_library",
+    ],
+    estimatedDurationMinutes: 25,
+    active: true,
+  },
+  {
+    id: "route_r02",
+    name: "Hostel Return",
+    code: "R-02",
+    description: "Hostel Block A toward the student areas and back to the gate.",
+    stopIds: [
+      "stop_hostel_a",
+      "stop_student_centre",
+      "stop_canteen",
+      "stop_main_gate",
+    ],
+    estimatedDurationMinutes: 20,
+    active: true,
+  },
+  {
+    id: "route_r03",
+    name: "Engineering Loop",
+    code: "R-03",
+    description: "Gate to the engineering block, sports complex, and library.",
+    stopIds: [
+      "stop_main_gate",
+      "stop_engineering",
+      "stop_sports",
+      "stop_library",
+    ],
+    estimatedDurationMinutes: 30,
+    active: true,
+  },
+  {
+    id: "route_r04",
+    name: "Hostel B Connector",
+    code: "R-04",
+    description: "Short connector from Hostel Block B to class and the student centre.",
+    stopIds: ["stop_hostel_b", "stop_academic", "stop_student_centre"],
+    estimatedDurationMinutes: 18,
+    active: true,
+  },
+  {
+    id: "route_r05",
+    name: "Library Express",
+    code: "R-05",
+    description: "Library to engineering and the main gate.",
+    stopIds: ["stop_library", "stop_engineering", "stop_main_gate"],
+    estimatedDurationMinutes: 22,
+    active: true,
+  },
+  {
+    id: "route_r06",
+    name: "Admin Ring",
+    code: "R-06",
+    description: "Academic block, administration, canteen, and Hostel Block B.",
+    stopIds: [
+      "stop_academic",
+      "stop_admin",
+      "stop_canteen",
+      "stop_hostel_b",
+    ],
+    estimatedDurationMinutes: 24,
+    active: true,
+  },
+];

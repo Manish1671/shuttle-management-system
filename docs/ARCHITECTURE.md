@@ -30,7 +30,45 @@ Browser
               └── /admin/analytics
 ```
 
-Rider and admin routes are placeholders. They render inside the shell and do not contain booking, driver, route, or analytics logic.
+Rider and admin routes are placeholders. They render inside the shell and do not contain booking, driver, route, or analytics screens. Domain records exist underneath those screens and are not rendered yet.
+
+### Domain data
+
+```
+UI (later milestones)
+  ↓
+Feature layer (src/features)
+  ↓
+Service layer (src/services)
+  ↓
+Repository (src/services/repository)
+  ↓
+localStorage, seeded from src/data/seed
+```
+
+Services are the only API future screens should call. They do not import React. Pages must not import seed arrays. The repository is a set of in-memory collections keyed by id. On the first browser load, or when `campusride:schema-version` changes, each collection is copied from seed into `localStorage`. Later loads read those keys. Server rendering never touches `localStorage`; a read during rendering returns the seed, and a write in that environment throws.
+
+Dates are `YYYY-MM-DD`. Times are `HH:mm`. A booking timestamp is `YYYY-MM-DDTHH:mm`. Relationships are ids, not nested copies. Route `stopIds` keep stop order.
+
+`validateDataset` checks the seed for dangling ids, stop order, pickup and drop-off order, capacity, driver and vehicle overlaps, and duty and break rules. Cancelled bookings do not occupy a seat. Cancelled trips do not block a driver or vehicle. Run it with `npm run validate:seed`.
+
+### Rider booking
+
+```
+/book
+  ↓
+Booking flow (src/features/booking-flow)
+  ↓
+bookingService.searchBookableTrips / createBooking
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+A rider chooses a date, an active route, then a pickup and a later stop on that route. The search reads trips and bookings and does not write. Only `scheduled` and `boarding` trips with a free seat are shown. Completed, cancelled, in-progress, departed, and full trips are left out. Confirming calls `createBooking`, which checks the user, trip, route, stop order, duplicate booking, and remaining seats again before writing. The new record uses an id such as `BK-1001`. The trip's `bookedSeats` count is updated to match occupied seats. Admin booking screens are still placeholders; they will read the same repository later.
+
+The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
 ### Demo authentication
 
@@ -60,21 +98,19 @@ Shared primitives from shadcn/ui used by the shell are button, avatar, sheet, dr
 | Lucide | Icons |
 | ESLint (`eslint-config-next`) | Lint rules for Next.js and TypeScript |
 
-Planned, not installed yet: React Hook Form, Zod, Recharts, and Vitest. Mock domain data will live in the browser. Redux, Zustand, a database, and a separate API are out of scope for the MVP.
+Planned, not installed yet: React Hook Form, Zod, Recharts, and Vitest. Redux, Zustand, a database, and a separate API are out of scope for the MVP.
 
-## Planned layers
+## Layers
 
 | Layer | Path | Responsibility |
 | --- | --- | --- |
-| Routes | `src/app` | Pages, layouts, and route-level loading and error UI |
-| UI | `src/components` | Shared layout, display, feedback, and form primitives |
-| Features | `src/features` | Screens and components grouped by product area |
-| Services | `src/services` | Async functions the UI calls |
-| Server (in-browser) | `src/server` | Mock repository and domain rules |
-| Seed data | `src/data/seed` | Deterministic demo data |
-| Store | `src/store` | Shared client state hydrated from the repository |
-| Types | `src/types` | Domain types |
-| Lib | `src/lib` | Time helpers, formatting, and validation schemas |
-| Hooks | `src/hooks` | Small reusable hooks |
+| Routes | `src/app` | Pages and layouts. Placeholders only at this stage. |
+| UI | `src/components` | Shared layout and visual primitives |
+| Features | `src/features` | Screen-level modules. Auth is the only feature so far. |
+| Services | `src/services` | Domain reads and writes used by future screens |
+| Repository | `src/services/repository` | Collection storage over localStorage |
+| Seed data | `src/data/seed` | The initial campus network |
+| Types | `src/types` | User, driver, vehicle, stop, route, trip, booking, schedule |
+| Lib | `src/lib` | Time parsing and validation helpers |
 
-Feature modules will call services. Services will call the repository. Validation will live with the repository so the UI cannot bypass it. Replacing the repository with HTTP calls later should not require rewriting pages.
+`src/store` and `src/server` are reserved and unused. Shared client state is not needed while services read storage directly.
