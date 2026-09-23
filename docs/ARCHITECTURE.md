@@ -82,7 +82,25 @@ Repository
 localStorage
 ```
 
-The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept. Admin booking screens are still placeholders.
+The pages read only the signed-in rider's bookings and resolve trip, route, driver, vehicle, and stops into a `BookingViewModel`. Upcoming reservations are the nearest first. History is the newest trip first. Cancellation is `cancelBooking`: the service checks ownership, then refuses completed, started, boarding, or already cancelled bookings. A successful cancel sets the booking status to `cancelled` and recalculates `bookedSeats`. The record is kept. Admin booking management is still a placeholder.
+
+### Admin operations dashboard
+
+```
+/admin
+  ↓
+Admin dashboard feature
+  ↓
+Domain services (trips, bookings, drivers, vehicles, routes, stops, users, schedules)
+  ↓
+Repository
+  ↓
+localStorage
+```
+
+The overview is read-only. It loads each collection once, then derives today's trips, booking counts, hourly demand, route utilization, and alerts. Cancelled bookings do not count as demand or toward seat totals. Active trips are `boarding` and `in_progress` only.
+
+Driver availability is derived for the service date. A driver on a boarding or in-progress trip is On trip. Otherwise the duty schedule and the current clock decide Available, On break, or Off duty. The stored `Driver.status` field is not used for this screen, so the dashboard stays aligned with the timetable.
 
 The repository can later be replaced by an HTTP API without rewriting feature screens, because those screens will depend on the service functions rather than on storage.
 
@@ -112,9 +130,10 @@ Shared primitives from shadcn/ui used by the shell are button, avatar, sheet, dr
 | Tailwind CSS 4 | Styling from shared design tokens |
 | shadcn/ui | Accessible shell primitives |
 | Lucide | Icons |
+| Recharts | Hourly demand chart on the admin overview |
 | ESLint (`eslint-config-next`) | Lint rules for Next.js and TypeScript |
 
-Planned, not installed yet: React Hook Form, Zod, Recharts, and Vitest. Redux, Zustand, a database, and a separate API are out of scope for the MVP.
+React Hook Form and Zod are used by the booking search form. Vitest is not installed. Redux, Zustand, a database, and a separate API are out of scope for the MVP.
 
 ## Layers
 

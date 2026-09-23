@@ -60,6 +60,11 @@ export function hasDeparted(
   return new Date(year, month - 1, day, hours, minutes).getTime() <= now.getTime();
 }
 
+/** Minutes from local midnight for a clock time already in memory. */
+export function clockMinutes(now = new Date()): number {
+  return now.getHours() * 60 + now.getMinutes();
+}
+
 /** Returns minutes from midnight, or null when the value is not HH:mm. */
 export function parseTimeToMinutes(value: string): number | null {
   if (!isTimeString(value)) {

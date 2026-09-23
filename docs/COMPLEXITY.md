@@ -41,3 +41,16 @@ Dataset integrity runs these checks across the seed once. That pass is O(n²) in
 | Sort bookings | O(bᵤ log bᵤ) | O(bᵤ) | Compared by `YYYY-MM-DDTHH:mm`. Upcoming is ascending. History is descending. |
 | History filter | O(bᵤ) | O(bᵤ) | One pass over the rider's past and cancelled views. |
 | Cancel booking | O(b) | O(b) | Finds the booking, updates its status, recounts occupied seats, and rewrites both collections. |
+
+## Admin dashboard
+
+The overview reads each collection once, builds id maps, and groups non-cancelled bookings by trip. Later sections reuse those maps. Nothing is written.
+
+| Operation | Time | Space | Notes |
+| --- | --- | --- | --- |
+| Load collections | O(n) | O(n) | One `getAll` per collection. `n` is the stored records copied out of the repository. |
+| Daily metrics | O(t + b) | O(t) | Today's trips are filtered once. Occupied seats are the grouped booking lists. |
+| Hourly demand | O(t) | O(h) | One pass over today's trips. `h` is the hours between the first and last departure, at most 24. |
+| Peak hour | O(h) | O(h) | Every hour that matches the highest non-zero count is returned, so a tie stays a tie. |
+| Route utilization | O(t) | O(r) | Non-cancelled trips are summed by route. Cancelled trips are left out of both bookings and capacity. |
+| Driver status summary | O(d) | O(d) | Each driver is classified from today's trips and that driver's schedule. The stored driver status is not read. |
